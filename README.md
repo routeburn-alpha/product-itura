@@ -4,6 +4,8 @@ A product trivia app built to showcase the studio-ai workflow end-to-end: ideas 
 
 Quiz Lab is a starter template — fork it, point it at your own studio-ai workspace, and use it to demo "idea to production" for your team.
 
+New here? Start with the [Onboarding guide](./ONBOARDING.md) for the end-to-end Studio AI walkthrough.
+
 ## Getting started
 
 ```bash
