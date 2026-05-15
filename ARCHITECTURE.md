@@ -22,7 +22,7 @@ There is intentionally no backend in v1. Scores, leaderboards, and feedback pers
 ## Project Structure
 
 ```
-playground-app-template/
+product-demo-template/
 ├── app/
 │   ├── src/
 │   │   ├── routes/

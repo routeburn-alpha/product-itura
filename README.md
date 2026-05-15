@@ -1,6 +1,6 @@
 # Quiz Lab
 
-A playground trivia app built to showcase the studio-ai workflow end-to-end: ideas → tasks → branches → PRs → production. Pick a pack, play a round, and watch new packs ship while you play.
+A product trivia app built to showcase the studio-ai workflow end-to-end: ideas → tasks → branches → PRs → production. Pick a pack, play a round, and watch new packs ship while you play.
 
 Quiz Lab is a starter template — fork it, point it at your own studio-ai workspace, and use it to demo "idea to production" for your team.
 
@@ -19,7 +19,7 @@ Open `http://localhost:5173`.
 - Two seeded packs: **Premier League Trivia** and **NYT-Easy Trivia**
 - A pack picker home page (`/`)
 - A play screen (`/play/[pack]`) with one-question-at-a-time scoring
-- `.mcp.json` pre-wired for the studio-ai MCP server so an agent can pick up tasks against this repo
+- `.mcp.json` pre-wired for the studio-ai MCP server so an agent can pick up tasks against this repo, but will need token (get from Admin) - this should be added to your .gitignore file once token is entered
 - GitHub Pages deploy + PR-preview workflows in `.github/workflows/`
 
 ## Adding a new pack

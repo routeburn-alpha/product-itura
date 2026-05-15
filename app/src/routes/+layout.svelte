@@ -11,7 +11,7 @@
 
 <nav class="top-nav">
 	<a class="brand" href="{base}/">Quiz Lab</a>
-	<a class="github" href="https://github.com/routeburn-alpha/playground-app-template" rel="noopener" target="_blank">View on GitHub</a>
+	<a class="github" href="https://github.com/routeburn-alpha/product-demo-template" rel="noopener" target="_blank">View on GitHub</a>
 </nav>
 
 {@render children()}
