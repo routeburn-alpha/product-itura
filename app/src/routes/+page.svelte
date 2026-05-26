@@ -7,67 +7,127 @@
 </script>
 
 <div class="container">
-	<header>
-		<h1>Quiz Lab</h1>
-		<p class="subtitle">Pick a pack. Race the clock. Rate the questions. Watch packs ship while you play.</p>
+	<header class="page-header">
+		<div>
+			<p class="eyebrow">Quiz Lab</p>
+			<h1>Pick a pack</h1>
+			<p class="subtitle">Choose a published trivia pack and jump straight into a round.</p>
+		</div>
 	</header>
 
-	<section>
+	<section class="pack-section" aria-labelledby="packs-title">
+		<div class="section-heading">
+			<div>
+				<p class="eyebrow">Published packs</p>
+				<h2 id="packs-title">Play existing quizzes</h2>
+			</div>
+			<span>{packs.length} packs</span>
+		</div>
+
 		<div class="pack-grid">
 			{#each packs as pack (pack.id)}
 				<a class="pack-card" href="{base}/play/{pack.id}">
 					<div class="pack-header">
-						<h2>{pack.title}</h2>
+						<h3>{pack.title}</h3>
 						<span class="category">{pack.category}</span>
 					</div>
 					<p class="description">{pack.description}</p>
 					<div class="meta">
-						<span class="count">{pack.questions.length} questions</span>
-						<span class="play">Play →</span>
+						<span>{pack.questions.length} questions</span>
+						<span class="play">Play -></span>
 					</div>
 				</a>
 			{/each}
 		</div>
 	</section>
-
-	<footer>
-		<p>
-			Want to add your own pack? Drop a JSON file in <code>app/src/lib/data/packs/</code> and open a PR.
-			This whole app is the studio-ai demo loop — every change you see ships through it.
-		</p>
-	</footer>
 </div>
 
 <style>
 	.container {
-		max-width: 880px;
+		max-width: 1080px;
 		margin: 0 auto;
-		padding: 2.5rem 2rem;
+		padding: 2rem;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		color: #141414;
 	}
 
-	header {
-		margin-bottom: 2.5rem;
+	.page-header,
+	.section-heading,
+	.pack-header,
+	.meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.eyebrow {
+		margin: 0 0 0.35rem;
+		color: #0f766e;
+		font-size: 0.74rem;
+		font-weight: 800;
+		letter-spacing: 0;
+		text-transform: uppercase;
+	}
+
+	h1,
+	h2,
+	h3,
+	p {
+		margin-top: 0;
 	}
 
 	h1 {
-		font-size: 2.25rem;
-		font-weight: 800;
-		color: #111;
+		margin-bottom: 0.45rem;
+		font-size: 2.75rem;
+		font-weight: 850;
+		line-height: 1;
+		letter-spacing: 0;
+	}
+
+	h2 {
+		margin-bottom: 0;
+		font-size: 1.25rem;
+		line-height: 1.2;
+		letter-spacing: 0;
+	}
+
+	h3 {
 		margin: 0;
-		letter-spacing: -0.02em;
+		font-size: 1.05rem;
+		line-height: 1.3;
+		letter-spacing: 0;
 	}
 
 	.subtitle {
+		max-width: 54ch;
+		margin-bottom: 0;
 		color: #555;
-		margin: 0.5rem 0 0;
-		font-size: 1rem;
-		max-width: 60ch;
+		line-height: 1.55;
+	}
+
+	.pack-section {
+		border-top: 1px solid #e6e6e6;
+		padding-top: 1.5rem;
+	}
+
+	.section-heading {
+		margin-bottom: 1rem;
+	}
+
+	.section-heading > span {
+		color: #666;
+		font-size: 0.9rem;
+		font-weight: 700;
 	}
 
 	.pack-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		gap: 1rem;
 	}
 
@@ -75,82 +135,73 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		border: 1px solid #e2e2e2;
-		border-radius: 12px;
-		padding: 1.25rem;
+		border: 1px solid #dedede;
+		border-radius: 8px;
 		background: #fff;
-		text-decoration: none;
+		padding: 1rem;
 		color: inherit;
-		transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+		text-decoration: none;
+		transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 	}
 
 	.pack-card:hover {
 		border-color: #1d4ed8;
+		box-shadow: 0 10px 24px rgba(20, 20, 20, 0.08);
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(29, 78, 216, 0.08);
-	}
-
-	.pack-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
-	h2 {
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: #111;
-		margin: 0;
 	}
 
 	.category {
-		font-size: 0.7rem;
-		font-weight: 600;
-		padding: 0.2rem 0.5rem;
-		border-radius: 4px;
+		flex-shrink: 0;
+		border-radius: 6px;
+		background: #effcf8;
+		color: #0f766e;
+		padding: 0.2rem 0.45rem;
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		background: #f0f9ff;
-		color: #1d4ed8;
 		white-space: nowrap;
 	}
 
 	.description {
-		color: #555;
-		font-size: 0.9rem;
-		line-height: 1.5;
-		margin: 0;
 		flex: 1;
+		margin-bottom: 0;
+		color: #555;
+		font-size: 0.92rem;
+		line-height: 1.5;
 	}
 
 	.meta {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		color: #777;
 		font-size: 0.85rem;
-		color: #888;
 	}
 
 	.play {
 		color: #1d4ed8;
-		font-weight: 600;
+		font-weight: 800;
+		white-space: nowrap;
 	}
 
-	footer {
-		margin-top: 3rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid #e2e2e2;
-		color: #666;
-		font-size: 0.875rem;
-		line-height: 1.6;
+	.pack-card:hover .play {
+		color: #0f766e;
 	}
 
-	code {
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
-		background: #f5f5f5;
-		padding: 0.1rem 0.35rem;
-		border-radius: 4px;
-		font-size: 0.85em;
+	@media (max-width: 680px) {
+		.container {
+			padding: 1.25rem;
+		}
+
+		.page-header,
+		.section-heading,
+		.pack-header,
+		.meta {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+
+		h1 {
+			font-size: 2rem;
+		}
+
 	}
 </style>
