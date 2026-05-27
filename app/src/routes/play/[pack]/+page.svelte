@@ -27,12 +27,15 @@
 
 	type PlayerAnswer = {
 		questionId: string;
+		type: QuestionType;
+		prompt: string;
 		answerText: string;
 		correctAnswerText: string;
 		isCorrect: boolean;
 		pointsEarned: number;
 		pointsPossible: number;
 		timedOut: boolean;
+		explanation: string;
 	};
 
 	let { data } = $props();
@@ -71,6 +74,7 @@
 		answers.reduce((total, answer) => total + answer.pointsEarned, 0)
 	);
 	const correctCount = $derived(answers.filter((answer) => answer.isCorrect).length);
+	const incorrectCount = $derived(answers.length - correctCount);
 	const scorePercent = $derived(
 		totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
 	);
@@ -292,12 +296,15 @@
 
 		return {
 			questionId: currentQuestion.id,
+			type: currentQuestion.type,
+			prompt: currentQuestion.prompt,
 			answerText: getAnswerText(currentQuestion, value, timedOut),
 			correctAnswerText: getCorrectAnswerText(currentQuestion),
 			isCorrect,
 			pointsEarned: isCorrect ? currentQuestion.points : 0,
 			pointsPossible: currentQuestion.points,
-			timedOut
+			timedOut,
+			explanation: currentQuestion.explanation
 		};
 	}
 
@@ -553,27 +560,90 @@
 		</div>
 	{:else}
 		<div class="result-card">
-			<a class="back-link" href="{base}/">Back to packs</a>
-			<p class="result-label">You scored</p>
-			<p class="result-score">{scorePercent}%</p>
-			<p class="result-points">
-				{earnedPoints} of {totalPoints} points - {correctCount} of {questions.length} correct
-			</p>
-			<p class="result-summary">
-				{#if scorePercent === 100}
-					Perfect round. Nicely played.
-				{:else if scorePercent >= 70}
-					Strong showing. One more pass and this one is yours.
-				{:else if scorePercent >= 40}
-					Not bad. The explanations should help on the replay.
-				{:else}
-					Rough round. Reset and give it another run.
-				{/if}
-			</p>
+			<div class="result-hero">
+				<a class="back-link" href="{base}/">Back to packs</a>
+				<p class="result-label">You scored</p>
+				<p class="result-score">{scorePercent}%</p>
+				<p class="result-points">
+					{earnedPoints} of {totalPoints} points - {correctCount} of {questions.length} correct
+				</p>
+				<p class="result-summary">
+					{#if scorePercent === 100}
+						Perfect round. Nicely played.
+					{:else if scorePercent >= 70}
+						Strong showing. One more pass and this one is yours.
+					{:else if scorePercent >= 40}
+						Not bad. The explanations should help on the replay.
+					{:else}
+						Rough round. Reset and give it another run.
+					{/if}
+				</p>
+			</div>
+
+			<div class="result-stats" aria-label="Score summary">
+				<div>
+					<span>Correct</span>
+					<strong>{correctCount}</strong>
+				</div>
+				<div>
+					<span>Missed</span>
+					<strong>{incorrectCount}</strong>
+				</div>
+				<div>
+					<span>Points</span>
+					<strong>{earnedPoints}/{totalPoints}</strong>
+				</div>
+			</div>
+
 			<div class="result-actions">
 				<button type="button" class="primary-button" onclick={startRound}>Play again</button>
 				<a class="secondary-button" href="{base}/">Pick another pack</a>
 			</div>
+
+			<section class="review-section" aria-labelledby="review-title">
+				<div class="review-heading">
+					<div>
+						<p class="result-label">Answer review</p>
+						<h2 id="review-title">Review every question</h2>
+					</div>
+				</div>
+
+				<ol class="review-list">
+					{#each answers as answer, reviewIndex (answer.questionId)}
+						<li class:correct={answer.isCorrect} class:wrong={!answer.isCorrect}>
+							<div class="review-item-heading">
+								<span>{reviewIndex + 1}</span>
+								<div>
+									<strong>{answer.prompt}</strong>
+									<small>{formatQuestionType(answer.type)}</small>
+								</div>
+							</div>
+
+							<div class="review-grid">
+								<div>
+									<span>Your answer</span>
+									<strong>{answer.answerText}</strong>
+								</div>
+								<div>
+									<span>Correct answer</span>
+									<strong>{answer.correctAnswerText}</strong>
+								</div>
+								<div>
+									<span>Score</span>
+									<strong>
+										{answer.pointsEarned}/{answer.pointsPossible}
+										{answer.pointsPossible === 1 ? 'point' : 'points'}
+									</strong>
+								</div>
+							</div>
+
+							{#if answer.explanation}
+								<p class="review-explanation">{answer.explanation}</p>
+							{/if}
+						</li>
+					{/each}
+				</ol>
+			</section>
 		</div>
 	{/if}
 </div>
@@ -596,7 +666,8 @@
 	.top-meta,
 	.pack-kicker,
 	.action-row,
-	.result-actions {
+	.result-actions,
+	.review-item-heading {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -687,6 +758,7 @@
 	}
 
 	h1,
+	h2,
 	p {
 		margin-top: 0;
 	}
@@ -698,6 +770,13 @@
 		font-weight: 850;
 		letter-spacing: 0;
 		text-transform: uppercase;
+	}
+
+	h2 {
+		margin-bottom: 0;
+		font-size: 1.2rem;
+		line-height: 1.25;
+		letter-spacing: 0;
 	}
 
 	.prompt {
@@ -906,8 +985,22 @@
 		display: grid;
 		gap: 1rem;
 		margin-top: 1rem;
+	}
+
+	.empty-card {
 		text-align: center;
 		justify-items: center;
+	}
+
+	.result-card {
+		justify-items: stretch;
+	}
+
+	.result-hero {
+		display: grid;
+		gap: 0.9rem;
+		justify-items: center;
+		text-align: center;
 	}
 
 	.result-label {
@@ -940,6 +1033,116 @@
 		line-height: 1.5;
 	}
 
+	.result-stats {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
+		border-top: 1px solid #ececec;
+		border-bottom: 1px solid #ececec;
+		padding: 1rem 0;
+	}
+
+	.result-stats div,
+	.review-grid div {
+		display: grid;
+		gap: 0.2rem;
+	}
+
+	.result-stats span,
+	.review-grid span,
+	.review-item-heading small {
+		color: #666;
+		font-size: 0.76rem;
+		font-weight: 850;
+		letter-spacing: 0;
+		text-transform: uppercase;
+	}
+
+	.result-stats strong {
+		font-size: 1.2rem;
+		line-height: 1.2;
+	}
+
+	.review-section {
+		display: grid;
+		gap: 1rem;
+		margin-top: 0.5rem;
+		border-top: 1px solid #ececec;
+		padding-top: 1.25rem;
+		text-align: left;
+	}
+
+	.review-list {
+		display: grid;
+		gap: 0.85rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.review-list li {
+		display: grid;
+		gap: 0.85rem;
+		border-left: 3px solid #d1d5db;
+		background: #f8fafc;
+		padding: 1rem;
+	}
+
+	.review-list li.correct {
+		border-color: #16a34a;
+	}
+
+	.review-list li.wrong {
+		border-color: #dc2626;
+	}
+
+	.review-item-heading {
+		align-items: flex-start;
+		justify-content: flex-start;
+	}
+
+	.review-item-heading > span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 1.9rem;
+		height: 1.9rem;
+		border-radius: 999px;
+		background: #effcf8;
+		color: #0f766e;
+		font-size: 0.82rem;
+		font-weight: 850;
+	}
+
+	.review-item-heading div {
+		display: grid;
+		gap: 0.25rem;
+		min-width: 0;
+	}
+
+	.review-item-heading strong {
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+
+	.review-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.review-grid strong,
+	.review-explanation {
+		overflow-wrap: anywhere;
+	}
+
+	.review-explanation {
+		margin-bottom: 0;
+		color: #555;
+		line-height: 1.5;
+	}
+
 	@keyframes enter-question {
 		from {
 			opacity: 0;
@@ -960,7 +1163,8 @@
 		.top-row,
 		.top-meta,
 		.action-row,
-		.result-actions {
+		.result-actions,
+		.review-item-heading {
 			align-items: flex-start;
 			flex-direction: column;
 		}
@@ -976,6 +1180,11 @@
 		}
 
 		.boolean-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.result-stats,
+		.review-grid {
 			grid-template-columns: 1fr;
 		}
 
