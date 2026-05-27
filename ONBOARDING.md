@@ -347,12 +347,14 @@ We're shipping three Claude Code skills into the product repos before alpha laun
 | `/bootstrap-agent` | Repairs an existing agent workspace, reinstalls deps, and verifies tests pass when something's out of sync |
 | `/worktree-status` | Reports on workspace health (clean tree, up-to-date with main, stale branches) |
 
-They're optional. Use whatever workflow works best for managing your agents, whether that's these skills, a custom script, or doing it by hand.
+They're optional. Use whatever workflow works best for managing your agents, whether that's these skills, a custom script, Codex, or doing it by hand.
 
 
 ### Part A: Stand up your first agent
 
 > **Optional workflow.** The steps below use the checked-in skills (`/create-agent`, `/bootstrap-agent`, `/worktree-status`) because they're the fastest path. You don't have to use them. Drive your worktrees, clones, or containers however works best for you.
+
+#### Option 1: Claude Code
 
 **1. Run `/create-agent`** from a Claude Code session in the product repo. Pick a name when prompted (`felix`, `kevin`, `alice`, anything memorable). The skill creates a git worktree on a new branch and stubs out the environment.
 
@@ -363,6 +365,48 @@ They're optional. Use whatever workflow works best for managing your agents, whe
 **4. Register the agent in Studio AI.** Ask your agent in plain language: *"Register me as a supervised agent named `quiz-felix`."* It calls `register_agent` for you. Alpha uses supervised mode (managed modes ship later). If you want to confirm, ask: *"List the registered agents."*
 
 **5. Sanity-check anytime with `/worktree-status`.** Reports the workspace state (clean, branch, sync with `main`). Useful before picking up a task and after long-running agent runs.
+
+#### Option 2: Codex
+
+Codex uses the same Studio AI MCP server and the same one-agent-per-worktree model. For Codex, put the Studio MCP config in `.codex/config.toml` and send the agent identity as the `X-Agent-Name` HTTP header. That header is what lets `work_on_next_task` and `submit_for_review` see the right agent.
+
+**1. Create a worktree for the agent.** Pick a short agent name and the next unused number for this repo. The port convention is `5173 + agent number`.
+
+```bash
+REPO_ROOT=$(git rev-parse --show-toplevel)
+BASE_DIR=$(dirname "$REPO_ROOT")
+REPO_NAME=$(basename "$REPO_ROOT")
+AGENT_NAME=quiz-felix
+NEXT_NUM=1
+AGENT_PORT=$((5173 + NEXT_NUM))
+
+git worktree add -b agent/$AGENT_NAME "$BASE_DIR/$REPO_NAME-$NEXT_NUM-$AGENT_NAME" main
+cd "$BASE_DIR/$REPO_NAME-$NEXT_NUM-$AGENT_NAME"
+```
+
+**2. Configure Codex for Studio AI.** Copy the server URL and header shape from `.mcp.json` into `.codex/config.toml` in the new worktree. Set `X-Agent-Name` to the worktree's agent name, and plug in your own Studio bearer token. Keep the bearer token out of git; this template ignores `.codex/`, but add it to `.git/info/exclude` first if your fork does not.
+
+```toml
+[mcp_servers.studio-ai]
+url = "https://app.routeburn.org/api/mcp"
+
+[mcp_servers.studio-ai.http_headers]
+Authorization = "Bearer <studio-ai-token>"
+X-Agent-Name = "quiz-felix"
+```
+
+If you already have the Studio AI MCP server configured globally, add or override the `X-Agent-Name` header in this worktree so Studio can attribute task pickup and review submission correctly.
+
+**3. Open Codex in the agent worktree.** Start a fresh Codex session from the new directory so it reads the worktree's `.codex/config.toml`.
+
+```bash
+cd "$BASE_DIR/$REPO_NAME-$NEXT_NUM-$AGENT_NAME"
+codex
+```
+
+**4. Register the agent in Studio AI.** Ask Codex in plain language: *"Register me as a supervised agent named `quiz-felix`."* It calls `register_agent` for you. If you want to confirm, ask: *"List the registered agents."*
+
+**5. Sanity-check the connection before taking work.** Ask Codex to validate the MCP server connection, then pick up a task. If `work_on_next_task` says `AGENT_NAME` is missing, confirm `.codex/config.toml` has `X-Agent-Name = "quiz-felix"` under `[mcp_servers.studio-ai.http_headers]`, then restart Codex from the agent worktree so the config is loaded.
 
 ### Part B: Get an idea ready
 
@@ -381,7 +425,7 @@ They're optional. Use whatever workflow works best for managing your agents, whe
 
 ### Part C: Hand the task to your agent
 
-**9. Tell your agent to pick up a task.** From inside Claude Code:
+**9. Tell your agent to pick up a task.** From inside Claude Code or Codex:
 
 ```
 "Pick up task #N and work on it."
@@ -422,7 +466,7 @@ Once one agent is humming, you can add more. Each agent claims its own task and 
 
 **15. Run `/create-agent` again** with a different agent name (`iris`, `kevin`, whatever). Same flow as Part A. The skill creates a fresh worktree and stubs the environment.
 
-**16. Bootstrap and register the new agent.** Open Claude Code in the new workspace, run `/bootstrap-agent`, then `register_agent` for the new name. From then on, the new agent can pick up tasks in parallel with the first one.
+**16. Bootstrap and register the new agent.** Open Claude Code or Codex in the new workspace, run `/bootstrap-agent`, then `register_agent` for the new name. From then on, the new agent can pick up tasks in parallel with the first one.
 
 **17. Avoid collisions.** Before starting both dev servers, walk through *"The collision checklist"* sub-section above. The most common ones in practice: ports (assign each worktree its own `PORT` in `.env.local` at the root of the worktree) and local DB files (give each worktree its own SQLite path or namespace).
 
