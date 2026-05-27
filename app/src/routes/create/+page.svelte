@@ -78,6 +78,20 @@
 	type QuizStatus = 'draft' | 'published';
 	type FeedbackTone = 'neutral' | 'success' | 'error';
 	type MoveDirection = 'up' | 'down';
+	type PreviewStatus = 'idle' | 'playing' | 'results';
+	type PreviewAnswerValue = string | boolean | null;
+	type PreviewAnswer = {
+		questionId: string;
+		type: QuestionType;
+		promptText: string;
+		answerText: string;
+		correctAnswerText: string;
+		isCorrect: boolean;
+		pointsEarned: number;
+		pointsPossible: number;
+		timedOut: boolean;
+		explanation: string;
+	};
 
 	let draft = $state<QuizDraft>(createDefaultDraft());
 	let questionDraft = $state<QuestionDraft>(createQuestionDraft());
@@ -95,6 +109,17 @@
 	let builderReady = $state(false);
 	let saveState = $state<'idle' | 'loaded' | 'saved'>('idle');
 	let promptEditor = $state<HTMLDivElement | null>(null);
+	let previewPanel = $state<HTMLElement | null>(null);
+	let previewStatus = $state<PreviewStatus>('idle');
+	let previewIndex = $state(0);
+	let previewSelectedOptionId = $state('');
+	let previewTrueFalseAnswer = $state<boolean | null>(null);
+	let previewBlankAnswer = $state('');
+	let previewSubmittedAnswer = $state<PreviewAnswer | null>(null);
+	let previewAnswers = $state<PreviewAnswer[]>([]);
+	let previewSecondsRemaining = $state(0);
+	let previewStartedAt = $state('');
+	let previewTimerId: number | null = null;
 
 	const titleError = $derived(
 		draft.title.trim().length >= 3 ? '' : 'Use at least 3 characters for the title.'
@@ -145,6 +170,34 @@
 				: ''
 	);
 	const saveQuestionLabel = $derived(editingQuestionId ? 'Update question' : 'Save question');
+	const previewQuestion = $derived(savedQuestions[previewIndex]);
+	const isPreviewActive = $derived(previewStatus !== 'idle');
+	const previewBlockReason = $derived(getPreviewBlockReason());
+	const previewCanSubmit = $derived(canSubmitPreviewAnswer(previewQuestion));
+	const previewIsLastQuestion = $derived(previewIndex + 1 >= savedQuestions.length);
+	const previewProgressLabel = $derived(
+		savedQuestions.length > 0
+			? `Question ${Math.min(previewIndex + 1, savedQuestions.length)} of ${savedQuestions.length}`
+			: 'No questions'
+	);
+	const previewProgressWidth = $derived(
+		savedQuestions.length > 0
+			? `${Math.min(100, ((previewIndex + (previewSubmittedAnswer ? 1 : 0)) / savedQuestions.length) * 100)}%`
+			: '0%'
+	);
+	const previewEarnedPoints = $derived(
+		previewAnswers.reduce((total, answer) => total + answer.pointsEarned, 0)
+	);
+	const previewCorrectCount = $derived(
+		previewAnswers.filter((answer) => answer.isCorrect).length
+	);
+	const previewScorePercent = $derived(
+		totalPoints > 0 ? Math.round((previewEarnedPoints / totalPoints) * 100) : 0
+	);
+	const previewTimerLabel = $derived(formatTimer(previewSecondsRemaining));
+	const previewTimerWarning = $derived(
+		draft.hasTimeLimit && previewSecondsRemaining > 0 && previewSecondsRemaining <= 10
+	);
 	const draftSnapshot = $derived({
 		title: draft.title,
 		description: draft.description,
@@ -350,6 +403,281 @@
 		return questionTypes.find((questionType) => questionType.value === type)?.label ?? 'Question';
 	}
 
+	function formatTimer(totalSeconds: number) {
+		const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+		const minutes = Math.floor(safeSeconds / 60);
+		const seconds = safeSeconds % 60;
+
+		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	}
+
+	function getNormalizedTimeLimitSeconds() {
+		const seconds = Number(draft.timeLimitSeconds);
+		if (!Number.isFinite(seconds)) return 30;
+
+		return Math.min(10800, Math.max(1, Math.round(seconds)));
+	}
+
+	function getPreviewBlockReason() {
+		if (!isValid) return 'Resolve setup errors before previewing.';
+		if (savedQuestions.length === 0) return 'Add at least one question before previewing.';
+
+		return '';
+	}
+
+	function canSubmitPreviewAnswer(question?: SavedQuestion) {
+		if (!question || previewSubmittedAnswer) return false;
+
+		if (question.type === 'multiple-choice') {
+			return question.options.some((option) => option.id === previewSelectedOptionId);
+		}
+
+		if (question.type === 'true-false') {
+			return previewTrueFalseAnswer !== null;
+		}
+
+		return previewBlankAnswer.trim().length > 0;
+	}
+
+	function getCurrentPreviewAnswerValue(question: SavedQuestion): PreviewAnswerValue {
+		if (question.type === 'multiple-choice') return previewSelectedOptionId || null;
+		if (question.type === 'true-false') return previewTrueFalseAnswer;
+
+		return previewBlankAnswer;
+	}
+
+	function normalizePreviewTextAnswer(value: string) {
+		return value.trim().replace(/\s+/g, ' ').toLowerCase();
+	}
+
+	function getPreviewCorrectAnswerText(question: SavedQuestion) {
+		if (question.type === 'true-false') {
+			return question.trueFalseAnswer ? 'True' : 'False';
+		}
+
+		if (question.type === 'fill-blank') {
+			return question.blankAnswer.trim();
+		}
+
+		const correctOption = question.options.find((option) => option.id === question.correctOptionId);
+		return correctOption?.text.trim() ?? 'Correct answer missing';
+	}
+
+	function getPreviewAnswerText(question: SavedQuestion, value: PreviewAnswerValue, timedOut: boolean) {
+		if (timedOut || value === null || value === '') return 'No answer';
+
+		if (question.type === 'multiple-choice') {
+			const selectedOption = question.options.find((option) => option.id === value);
+			return selectedOption?.text.trim() ?? 'No answer';
+		}
+
+		if (question.type === 'true-false') {
+			return value ? 'True' : 'False';
+		}
+
+		return String(value).trim();
+	}
+
+	function isPreviewAnswerCorrect(
+		question: SavedQuestion,
+		value: PreviewAnswerValue,
+		timedOut: boolean
+	) {
+		if (timedOut || value === null || value === '') return false;
+
+		if (question.type === 'multiple-choice') {
+			return value === question.correctOptionId;
+		}
+
+		if (question.type === 'true-false') {
+			return value === question.trueFalseAnswer;
+		}
+
+		return normalizePreviewTextAnswer(String(value)) === normalizePreviewTextAnswer(question.blankAnswer);
+	}
+
+	function createPreviewAnswer(
+		question: SavedQuestion,
+		value: PreviewAnswerValue,
+		timedOut = false
+	): PreviewAnswer {
+		const pointsPossible = normalizePoints(question.points);
+		const isCorrect = isPreviewAnswerCorrect(question, value, timedOut);
+
+		return {
+			questionId: question.id,
+			type: question.type,
+			promptText: question.promptText,
+			answerText: getPreviewAnswerText(question, value, timedOut),
+			correctAnswerText: getPreviewCorrectAnswerText(question),
+			isCorrect,
+			pointsEarned: isCorrect ? pointsPossible : 0,
+			pointsPossible,
+			timedOut,
+			explanation: question.explanation
+		};
+	}
+
+	function selectPreviewOption(optionId: string) {
+		if (previewSubmittedAnswer) return;
+		previewSelectedOptionId = optionId;
+	}
+
+	function setPreviewTrueFalseAnswer(answer: boolean) {
+		if (previewSubmittedAnswer) return;
+		previewTrueFalseAnswer = answer;
+	}
+
+	function resetPreviewQuestionInputs() {
+		previewSelectedOptionId = '';
+		previewTrueFalseAnswer = null;
+		previewBlankAnswer = '';
+		previewSubmittedAnswer = null;
+	}
+
+	function startPreview() {
+		attemptedSubmit = true;
+		if (previewBlockReason) {
+			setManagementFeedback(previewBlockReason, 'error');
+			return;
+		}
+
+		stopPreviewTimer();
+		previewStatus = 'playing';
+		previewAnswers = [];
+		previewStartedAt = new Date().toISOString();
+		preparePreviewQuestion(0);
+
+		if (draft.hasTimeLimit && draft.timeMode === 'total') {
+			startPreviewTimer(getNormalizedTimeLimitSeconds());
+		}
+
+		setManagementFeedback('Preview started.', 'neutral');
+
+		if (browser) {
+			setTimeout(() => previewPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+		}
+	}
+
+	function restartPreview() {
+		startPreview();
+	}
+
+	function preparePreviewQuestion(index: number) {
+		previewIndex = index;
+		resetPreviewQuestionInputs();
+
+		if (!draft.hasTimeLimit) {
+			stopPreviewTimer();
+			return;
+		}
+
+		if (draft.timeMode === 'per-question') {
+			startPreviewTimer(getNormalizedTimeLimitSeconds());
+		}
+	}
+
+	function startPreviewTimer(seconds: number) {
+		stopPreviewTimer();
+		previewSecondsRemaining = seconds;
+
+		if (!browser) return;
+
+		previewTimerId = window.setInterval(() => {
+			previewSecondsRemaining = Math.max(0, previewSecondsRemaining - 1);
+			if (previewSecondsRemaining <= 0) {
+				handlePreviewTimeout();
+			}
+		}, 1000);
+	}
+
+	function stopPreviewTimer() {
+		if (previewTimerId !== null && browser) {
+			window.clearInterval(previewTimerId);
+		}
+		previewTimerId = null;
+	}
+
+	function handlePreviewTimeout() {
+		if (previewStatus !== 'playing') return;
+
+		if (draft.timeMode === 'total') {
+			if (!previewSubmittedAnswer && previewQuestion) {
+				submitPreviewAnswer(true);
+			}
+			finishPreview('Time is up. Preview results are ready.');
+			return;
+		}
+
+		if (!previewSubmittedAnswer) {
+			submitPreviewAnswer(true);
+			setManagementFeedback('Time expired for this preview question.', 'neutral');
+		}
+	}
+
+	function submitPreviewAnswer(timedOut = false) {
+		if (!previewQuestion || previewSubmittedAnswer) return;
+		if (!timedOut && !previewCanSubmit) return;
+
+		const answer = createPreviewAnswer(
+			previewQuestion,
+			timedOut ? null : getCurrentPreviewAnswerValue(previewQuestion),
+			timedOut
+		);
+
+		previewSubmittedAnswer = answer;
+		previewAnswers = [...previewAnswers, answer];
+
+		if (!draft.hasTimeLimit || draft.timeMode === 'per-question') {
+			stopPreviewTimer();
+		}
+	}
+
+	function advancePreview() {
+		if (!previewSubmittedAnswer) {
+			submitPreviewAnswer();
+			return;
+		}
+
+		if (previewIsLastQuestion) {
+			finishPreview();
+			return;
+		}
+
+		preparePreviewQuestion(previewIndex + 1);
+	}
+
+	function finishPreview(message = 'Preview complete.') {
+		const answeredQuestionIds = new Set(previewAnswers.map((answer) => answer.questionId));
+		const unansweredAnswers = savedQuestions
+			.filter((question) => !answeredQuestionIds.has(question.id))
+			.map((question) => createPreviewAnswer(question, null, true));
+
+		if (unansweredAnswers.length > 0) {
+			previewAnswers = [...previewAnswers, ...unansweredAnswers];
+		}
+
+		previewStatus = 'results';
+		previewSubmittedAnswer = null;
+		stopPreviewTimer();
+		setManagementFeedback(message, 'neutral');
+	}
+
+	function resetPreviewSession() {
+		stopPreviewTimer();
+		previewStatus = 'idle';
+		previewIndex = 0;
+		previewAnswers = [];
+		previewStartedAt = '';
+		previewSecondsRemaining = 0;
+		resetPreviewQuestionInputs();
+	}
+
+	function exitPreview() {
+		resetPreviewSession();
+		setManagementFeedback('Returned to editor.', 'neutral');
+	}
+
 	function serializeQuestionDraft(question: QuestionDraft): QuestionDraft {
 		return {
 			type: question.type,
@@ -425,6 +753,10 @@
 		}
 
 		draftReady = true;
+
+		return () => {
+			stopPreviewTimer();
+		};
 	});
 
 	$effect(() => {
@@ -478,6 +810,7 @@
 	}
 
 	function resetDraft() {
+		resetPreviewSession();
 		draft = createDefaultDraft();
 		questionDraft = createQuestionDraft();
 		savedQuestions = [];
@@ -709,6 +1042,9 @@
 	}
 
 	function markDraftChanged(message: string) {
+		if (isPreviewActive) {
+			resetPreviewSession();
+		}
 		if (quizStatus === 'published') {
 			quizStatus = 'draft';
 		}
@@ -1147,6 +1483,7 @@
 				<div class="management-actions">
 					<button type="button" class="secondary-button" onclick={saveDraftManually}>Save draft</button>
 					<button type="button" class="primary-button" onclick={publishQuiz}>Publish</button>
+					<button type="button" class="secondary-button" onclick={startPreview}>Preview quiz</button>
 				</div>
 
 				{#if managementFeedback}
@@ -1155,6 +1492,186 @@
 					</p>
 				{/if}
 			</div>
+
+			{#if isPreviewActive}
+				<section class="preview-area" aria-labelledby="preview-title" bind:this={previewPanel}>
+					<div class="preview-topbar">
+						<div>
+							<p class="step-label">Preview mode</p>
+							<h3 id="preview-title">{draft.title || 'Untitled quiz'}</h3>
+							<p>
+								{#if previewStatus === 'playing'}
+									{previewProgressLabel}
+								{:else}
+									{previewCorrectCount} of {savedQuestions.length} correct
+								{/if}
+							</p>
+						</div>
+
+						<div class="preview-meta">
+							{#if draft.hasTimeLimit && previewStatus === 'playing'}
+								<span class:warning={previewTimerWarning} class="timer-pill">
+									{draft.timeMode === 'per-question' ? 'Question timer' : 'Quiz timer'} {previewTimerLabel}
+								</span>
+							{/if}
+							<button type="button" class="secondary-button" onclick={exitPreview}>Back to editor</button>
+						</div>
+					</div>
+
+					{#if previewStatus === 'playing' && previewQuestion}
+						<div class="preview-progress" aria-hidden="true">
+							<span style={`width: ${previewProgressWidth};`}></span>
+						</div>
+
+						<article class="preview-question-card">
+							<div class="preview-question-heading">
+								<span>{formatQuestionType(previewQuestion.type)}</span>
+								<strong>
+									{previewQuestion.points} {previewQuestion.points === 1 ? 'point' : 'points'}
+								</strong>
+							</div>
+
+							<p class="preview-prompt">{previewQuestion.promptText}</p>
+
+							{#if previewQuestion.type === 'multiple-choice'}
+								<div class="preview-choice-list">
+									{#each previewQuestion.options as option, index (option.id)}
+										{@const isSelected = previewSelectedOptionId === option.id}
+										{@const isCorrectOption =
+											!!previewSubmittedAnswer && option.id === previewQuestion.correctOptionId}
+										{@const isWrongOption =
+											!!previewSubmittedAnswer &&
+											isSelected &&
+											option.id !== previewQuestion.correctOptionId}
+										<button
+											type="button"
+											class="preview-choice"
+											class:selected={isSelected}
+											class:correct={isCorrectOption}
+											class:wrong={isWrongOption}
+											disabled={!!previewSubmittedAnswer}
+											onclick={() => selectPreviewOption(option.id)}
+										>
+											<span>{getOptionLabel(index)}</span>
+											<strong>{option.text}</strong>
+										</button>
+									{/each}
+								</div>
+							{:else if previewQuestion.type === 'true-false'}
+								<div class="preview-boolean">
+									<button
+										type="button"
+										class:selected={previewTrueFalseAnswer === true}
+										class:correct={!!previewSubmittedAnswer && previewQuestion.trueFalseAnswer}
+										class:wrong={!!previewSubmittedAnswer && previewTrueFalseAnswer === true && !previewQuestion.trueFalseAnswer}
+										disabled={!!previewSubmittedAnswer}
+										onclick={() => setPreviewTrueFalseAnswer(true)}
+									>
+										True
+									</button>
+									<button
+										type="button"
+										class:selected={previewTrueFalseAnswer === false}
+										class:correct={!!previewSubmittedAnswer && !previewQuestion.trueFalseAnswer}
+										class:wrong={!!previewSubmittedAnswer && previewTrueFalseAnswer === false && previewQuestion.trueFalseAnswer}
+										disabled={!!previewSubmittedAnswer}
+										onclick={() => setPreviewTrueFalseAnswer(false)}
+									>
+										False
+									</button>
+								</div>
+							{:else}
+								<label class="field preview-blank-field">
+									<span>Your answer</span>
+									<input
+										type="text"
+										placeholder="Type the answer"
+										bind:value={previewBlankAnswer}
+										disabled={!!previewSubmittedAnswer}
+									/>
+								</label>
+							{/if}
+
+							{#if previewSubmittedAnswer}
+								<div
+									class="preview-feedback"
+									class:correct={previewSubmittedAnswer.isCorrect}
+									class:wrong={!previewSubmittedAnswer.isCorrect}
+								>
+									<strong>
+										{#if previewSubmittedAnswer.timedOut}
+											Time expired.
+										{:else if previewSubmittedAnswer.isCorrect}
+											Correct.
+										{:else}
+											Not quite.
+										{/if}
+									</strong>
+									<span>
+										Correct answer: {previewSubmittedAnswer.correctAnswerText}
+									</span>
+									{#if previewSubmittedAnswer.explanation}
+										<p>{previewSubmittedAnswer.explanation}</p>
+									{/if}
+								</div>
+							{/if}
+
+							<div class="preview-actions">
+								<button
+									type="button"
+									class="primary-button"
+									disabled={!previewSubmittedAnswer && !previewCanSubmit}
+									onclick={advancePreview}
+								>
+									{#if previewSubmittedAnswer}
+										{previewIsLastQuestion ? 'See results' : 'Next question'}
+									{:else}
+										Submit answer
+									{/if}
+								</button>
+								<button type="button" class="secondary-button" onclick={restartPreview}>Restart</button>
+							</div>
+						</article>
+					{:else}
+						<div class="preview-results">
+							<div class="preview-score">
+								<span>{previewScorePercent}%</span>
+								<strong>{previewEarnedPoints} of {totalPoints} points</strong>
+								{#if previewStartedAt}
+									<small>Started {formatTimestamp(previewStartedAt)}</small>
+								{/if}
+							</div>
+
+							<div class="preview-result-actions">
+								<button type="button" class="primary-button" onclick={restartPreview}>Replay preview</button>
+								<button type="button" class="secondary-button" onclick={exitPreview}>Return to editing</button>
+							</div>
+
+							<ol class="preview-review-list">
+								{#each previewAnswers as answer, index (answer.questionId)}
+									<li class:correct={answer.isCorrect} class:wrong={!answer.isCorrect}>
+										<div class="review-heading">
+											<span>{index + 1}</span>
+											<strong>{answer.promptText}</strong>
+										</div>
+										<div class="review-details">
+											<p>Your answer: {answer.answerText}</p>
+											<p>Correct answer: {answer.correctAnswerText}</p>
+											<p>
+												Score: {answer.pointsEarned} / {answer.pointsPossible}
+												{answer.pointsPossible === 1 ? 'point' : 'points'}
+											</p>
+											{#if answer.explanation}
+												<p>{answer.explanation}</p>
+											{/if}
+										</div>
+									</li>
+								{/each}
+							</ol>
+						</div>
+					{/if}
+				</section>
+			{/if}
 
 			{#if savedQuestions.length > 0}
 				<ol class="managed-question-list">
@@ -1832,6 +2349,320 @@
 		color: #b91c1c;
 	}
 
+	.preview-area {
+		display: grid;
+		gap: 1rem;
+		margin: 0 -1.25rem;
+		border-top: 1px solid #ececec;
+		border-bottom: 1px solid #ececec;
+		background: #f8fafc;
+		padding: 1.25rem;
+	}
+
+	.preview-topbar,
+	.preview-meta,
+	.preview-question-heading,
+	.preview-actions,
+	.preview-result-actions,
+	.review-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.preview-topbar h3 {
+		margin: 0 0 0.35rem;
+		font-size: 1.25rem;
+		line-height: 1.2;
+		letter-spacing: 0;
+	}
+
+	.preview-topbar p {
+		margin-bottom: 0;
+		color: #666;
+		font-size: 0.9rem;
+	}
+
+	.preview-meta {
+		flex-shrink: 0;
+		justify-content: flex-end;
+	}
+
+	.timer-pill {
+		border: 1px solid #b7e4dc;
+		border-radius: 999px;
+		background: #effcf8;
+		color: #0f766e;
+		padding: 0.45rem 0.75rem;
+		font-size: 0.82rem;
+		font-weight: 800;
+		white-space: nowrap;
+	}
+
+	.timer-pill.warning {
+		border-color: #fed7aa;
+		background: #fff7ed;
+		color: #c2410c;
+	}
+
+	.preview-progress {
+		overflow: hidden;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: #e5e7eb;
+	}
+
+	.preview-progress span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: #1d4ed8;
+		transition: width 160ms ease;
+	}
+
+	.preview-question-card,
+	.preview-results {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.preview-question-heading {
+		color: #666;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0;
+		text-transform: uppercase;
+	}
+
+	.preview-question-heading strong {
+		color: #0f766e;
+	}
+
+	.preview-prompt {
+		margin-bottom: 0;
+		color: #111;
+		font-size: 1.35rem;
+		font-weight: 800;
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+
+	.preview-choice-list {
+		display: grid;
+		gap: 0.65rem;
+	}
+
+	.preview-choice,
+	.preview-boolean button {
+		min-height: 3rem;
+		border: 1.5px solid #d9d9d9;
+		border-radius: 8px;
+		background: #fff;
+		color: #222;
+		font: inherit;
+		font-weight: 750;
+		cursor: pointer;
+		transition:
+			background 120ms ease,
+			border-color 120ms ease,
+			color 120ms ease;
+	}
+
+	.preview-choice {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.85rem 1rem;
+		text-align: left;
+	}
+
+	.preview-choice span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 1.8rem;
+		height: 1.8rem;
+		border-radius: 6px;
+		background: #eef2ff;
+		color: #1d4ed8;
+		font-size: 0.8rem;
+		font-weight: 850;
+	}
+
+	.preview-choice strong {
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+
+	.preview-choice:hover:not(:disabled),
+	.preview-boolean button:hover:not(:disabled) {
+		border-color: #1d4ed8;
+	}
+
+	.preview-choice.selected,
+	.preview-boolean button.selected {
+		border-color: #1d4ed8;
+		background: #f4f7fb;
+		color: #1741b6;
+	}
+
+	.preview-choice.correct,
+	.preview-boolean button.correct {
+		border-color: #16a34a;
+		background: #f0fdf4;
+		color: #14532d;
+	}
+
+	.preview-choice.correct span {
+		background: #16a34a;
+		color: #fff;
+	}
+
+	.preview-choice.wrong,
+	.preview-boolean button.wrong {
+		border-color: #dc2626;
+		background: #fef2f2;
+		color: #7f1d1d;
+	}
+
+	.preview-choice.wrong span {
+		background: #dc2626;
+		color: #fff;
+	}
+
+	.preview-choice:disabled,
+	.preview-boolean button:disabled {
+		cursor: default;
+	}
+
+	.preview-boolean {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.preview-blank-field {
+		max-width: 32rem;
+	}
+
+	.preview-feedback {
+		display: grid;
+		gap: 0.35rem;
+		border-left: 3px solid #d1d5db;
+		background: #fff;
+		padding: 0.85rem 1rem;
+		line-height: 1.45;
+	}
+
+	.preview-feedback.correct {
+		border-color: #16a34a;
+		background: #f0fdf4;
+		color: #14532d;
+	}
+
+	.preview-feedback.wrong {
+		border-color: #dc2626;
+		background: #fef2f2;
+		color: #7f1d1d;
+	}
+
+	.preview-feedback p {
+		margin-bottom: 0;
+	}
+
+	.preview-actions,
+	.preview-result-actions {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.preview-score {
+		display: grid;
+		gap: 0.25rem;
+		border-bottom: 1px solid #e5e7eb;
+		padding-bottom: 1rem;
+	}
+
+	.preview-score span {
+		color: #1d4ed8;
+		font-size: 2.5rem;
+		font-weight: 850;
+		line-height: 1;
+	}
+
+	.preview-score strong {
+		font-size: 1rem;
+	}
+
+	.preview-score small {
+		color: #666;
+		font-size: 0.82rem;
+		font-weight: 700;
+	}
+
+	.preview-review-list {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.preview-review-list li {
+		display: grid;
+		gap: 0.65rem;
+		border-left: 3px solid #d1d5db;
+		background: #fff;
+		padding: 0.85rem 1rem;
+	}
+
+	.preview-review-list li.correct {
+		border-color: #16a34a;
+	}
+
+	.preview-review-list li.wrong {
+		border-color: #dc2626;
+	}
+
+	.review-heading {
+		align-items: flex-start;
+		justify-content: flex-start;
+	}
+
+	.review-heading span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 1.7rem;
+		height: 1.7rem;
+		border-radius: 999px;
+		background: #effcf8;
+		color: #0f766e;
+		font-size: 0.78rem;
+		font-weight: 850;
+	}
+
+	.review-heading strong {
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+
+	.review-details {
+		display: grid;
+		gap: 0.25rem;
+		color: #555;
+		font-size: 0.88rem;
+		line-height: 1.45;
+	}
+
+	.review-details p {
+		margin-bottom: 0;
+		overflow-wrap: anywhere;
+	}
+
 	.managed-question-list {
 		display: grid;
 		gap: 0.75rem;
@@ -1984,7 +2815,11 @@
 		.header-actions,
 		.management-toolbar,
 		.management-actions,
-		.managed-question-actions {
+		.managed-question-actions,
+		.preview-topbar,
+		.preview-meta,
+		.preview-actions,
+		.preview-result-actions {
 			align-items: flex-start;
 			flex-direction: column;
 		}
@@ -2005,7 +2840,8 @@
 
 		.segmented,
 		.time-controls .segmented,
-		.boolean-control {
+		.boolean-control,
+		.preview-boolean {
 			grid-template-columns: 1fr;
 		}
 
