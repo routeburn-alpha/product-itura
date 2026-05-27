@@ -108,6 +108,9 @@
 			: 'No time limit'
 	);
 	const promptText = $derived(getPlainText(questionDraft.promptHtml));
+	const isMultipleChoiceQuestion = $derived(questionDraft.type === 'multiple-choice');
+	const isTrueFalseQuestion = $derived(questionDraft.type === 'true-false');
+	const isFillBlankQuestion = $derived(questionDraft.type === 'fill-blank');
 	const questionErrors = $derived(getQuestionErrors());
 	const canSaveQuestion = $derived(questionErrors.length === 0);
 	const correctAnswerPreview = $derived(getCorrectAnswerPreview(questionDraft));
@@ -746,8 +749,12 @@
 						{/if}
 					</div>
 
-					{#if questionDraft.type === 'multiple-choice'}
-						<div class="answer-section">
+					<div class="type-control-stack" aria-label="Answer controls">
+						<div
+							class="answer-section type-controls"
+							hidden={!isMultipleChoiceQuestion}
+							aria-hidden={!isMultipleChoiceQuestion}
+						>
 							<div class="answer-heading">
 								<span>Answer options</span>
 								<small>{questionDraft.options.length} of {maxMultipleChoiceOptions}</small>
@@ -799,8 +806,12 @@
 								Add option
 							</button>
 						</div>
-					{:else if questionDraft.type === 'true-false'}
-						<div class="field">
+
+						<div
+							class="field type-controls"
+							hidden={!isTrueFalseQuestion}
+							aria-hidden={!isTrueFalseQuestion}
+						>
 							<span>Correct answer</span>
 							<div class="segmented boolean-control" role="group" aria-label="Correct answer">
 								<button
@@ -821,8 +832,12 @@
 								</button>
 							</div>
 						</div>
-					{:else}
-						<label class="field">
+
+						<label
+							class="field type-controls"
+							hidden={!isFillBlankQuestion}
+							aria-hidden={!isFillBlankQuestion}
+						>
 							<span>Accepted answer</span>
 							<input
 								type="text"
@@ -834,7 +849,7 @@
 								<span class="field-error">Add the accepted answer.</span>
 							{/if}
 						</label>
-					{/if}
+					</div>
 
 					<div class="builder-meta">
 						<label class="field points-field">
@@ -1057,10 +1072,15 @@
 
 	.field,
 	.time-section,
-	.answer-section {
+	.answer-section,
+	.type-control-stack {
 		display: flex;
 		flex-direction: column;
 		gap: 0.45rem;
+	}
+
+	.type-controls[hidden] {
+		display: none;
 	}
 
 	.field > span,
