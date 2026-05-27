@@ -1,104 +1,578 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { base } from '$app/paths';
-	import type { Pack } from '$lib/packs';
+	import { onMount } from 'svelte';
+	import type { Pack, QuestionType, TimeMode } from '$lib/packs';
+
+	type PlayableOption = {
+		id: string;
+		label: string;
+		text: string;
+	};
+
+	type PlayableQuestion = {
+		id: string;
+		type: QuestionType;
+		prompt: string;
+		options: PlayableOption[];
+		correctOptionId: string;
+		trueFalseAnswer: boolean;
+		blankAnswer: string;
+		difficulty: number;
+		explanation: string;
+		points: number;
+	};
+
+	type AnswerValue = string | boolean | null;
+
+	type PlayerAnswer = {
+		questionId: string;
+		answerText: string;
+		correctAnswerText: string;
+		isCorrect: boolean;
+		pointsEarned: number;
+		pointsPossible: number;
+		timedOut: boolean;
+	};
 
 	let { data } = $props();
 	const pack = $derived<Pack>(data.pack);
+	const questions = $derived(pack.questions.map(normalizeQuestion));
+	const totalPoints = $derived(
+		questions.reduce((total, question) => total + question.points, 0)
+	);
+	const hasTimer = $derived(Boolean(pack.hasTimeLimit && getTimeLimitSeconds() > 0));
+	const timeMode = $derived<TimeMode>(pack.timeMode === 'total' ? 'total' : 'per-question');
+	const timerModeLabel = $derived(timeMode === 'total' ? 'Quiz timer' : 'Question timer');
 
 	let index = $state(0);
-	let selected = $state<number | null>(null);
-	let answers = $state<number[]>([]);
+	let selectedOptionId = $state('');
+	let trueFalseAnswer = $state<boolean | null>(null);
+	let blankAnswer = $state('');
+	let submittedAnswer = $state<PlayerAnswer | null>(null);
+	let answers = $state<PlayerAnswer[]>([]);
 	let finished = $state(false);
+	let secondsRemaining = $state(0);
+	let timerId: number | null = null;
 
-	const question = $derived(pack.questions[index]);
-	const isCorrect = $derived(selected !== null && selected === question.correctIndex);
-	const score = $derived(
-		answers.filter((a: number, i: number) => a === pack.questions[i].correctIndex).length
+	const question = $derived(questions[index]);
+	const canSubmit = $derived(canSubmitAnswer(question));
+	const progressLabel = $derived(
+		questions.length > 0
+			? `Question ${Math.min(index + 1, questions.length)} of ${questions.length}`
+			: 'No questions'
 	);
+	const progressWidth = $derived(
+		questions.length > 0
+			? `${Math.min(100, ((index + (submittedAnswer ? 1 : 0)) / questions.length) * 100)}%`
+			: '0%'
+	);
+	const earnedPoints = $derived(
+		answers.reduce((total, answer) => total + answer.pointsEarned, 0)
+	);
+	const correctCount = $derived(answers.filter((answer) => answer.isCorrect).length);
+	const scorePercent = $derived(
+		totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
+	);
+	const timerLabel = $derived(formatTimer(secondsRemaining));
+	const timerWarning = $derived(hasTimer && secondsRemaining > 0 && secondsRemaining <= 10);
 
-	function choose(i: number) {
-		if (selected !== null) return;
-		selected = i;
+	onMount(() => {
+		startRound();
+
+		return () => {
+			stopTimer();
+		};
+	});
+
+	function normalizeQuestion(raw: Pack['questions'][number], fallbackIndex: number): PlayableQuestion {
+		const value = raw as Record<string, unknown>;
+		const type = getQuestionType(value);
+		const options = normalizeOptions(value);
+		const correctIndex = Number(value.correctIndex);
+		const correctOptionId =
+			typeof value.correctOptionId === 'string' &&
+			options.some((option) => option.id === value.correctOptionId)
+				? value.correctOptionId
+				: Number.isInteger(correctIndex) && options[correctIndex]
+					? options[correctIndex].id
+					: options[0]?.id ?? '';
+
+		return {
+			id: typeof value.id === 'string' ? value.id : `question-${fallbackIndex + 1}`,
+			type,
+			prompt: getPromptText(value),
+			options,
+			correctOptionId,
+			trueFalseAnswer:
+				typeof value.trueFalseAnswer === 'boolean' ? value.trueFalseAnswer : true,
+			blankAnswer: typeof value.blankAnswer === 'string' ? value.blankAnswer : '',
+			difficulty: Number(value.difficulty) || 1,
+			explanation: typeof value.explanation === 'string' ? value.explanation : '',
+			points: normalizePoints(value.points)
+		};
 	}
 
-	function next() {
-		if (selected === null) return;
-		answers = [...answers, selected];
-		if (index + 1 >= pack.questions.length) {
-			finished = true;
-		} else {
-			index = index + 1;
-			selected = null;
+	function getQuestionType(value: Record<string, unknown>): QuestionType {
+		if (value.type === 'true-false' || value.type === 'fill-blank' || value.type === 'multiple-choice') {
+			return value.type;
+		}
+
+		if (typeof value.trueFalseAnswer === 'boolean') return 'true-false';
+		if (typeof value.blankAnswer === 'string') return 'fill-blank';
+
+		return 'multiple-choice';
+	}
+
+	function getPromptText(value: Record<string, unknown>) {
+		const prompt =
+			typeof value.prompt === 'string'
+				? value.prompt
+				: typeof value.promptText === 'string'
+					? value.promptText
+					: typeof value.promptHtml === 'string'
+						? value.promptHtml
+						: 'Untitled question';
+
+		return stripHtml(prompt);
+	}
+
+	function stripHtml(value: string) {
+		return value
+			.replace(/<script[\s\S]*?<\/script>/gi, '')
+			.replace(/<style[\s\S]*?<\/style>/gi, '')
+			.replace(/<br\s*\/?>/gi, ' ')
+			.replace(/<[^>]*>/g, '')
+			.replace(/&nbsp;/g, ' ')
+			.replace(/&amp;/g, '&')
+			.replace(/&lt;/g, '<')
+			.replace(/&gt;/g, '>')
+			.replace(/\s+/g, ' ')
+			.trim();
+	}
+
+	function normalizeOptions(value: Record<string, unknown>) {
+		if (Array.isArray(value.options)) {
+			return value.options
+				.filter((option): option is Record<string, unknown> => Boolean(option))
+				.map((option, index) => ({
+					id: typeof option.id === 'string' ? option.id : `option-${index}`,
+					label: getOptionLabel(index),
+					text: typeof option.text === 'string' ? option.text : ''
+				}))
+				.filter((option) => option.text.trim().length > 0);
+		}
+
+		if (Array.isArray(value.choices)) {
+			return value.choices
+				.filter((choice): choice is string => typeof choice === 'string')
+				.map((choice, index) => ({
+					id: `choice-${index}`,
+					label: getOptionLabel(index),
+					text: choice
+				}));
+		}
+
+		return [];
+	}
+
+	function normalizePoints(value: unknown) {
+		const points = Number(value);
+		if (!Number.isFinite(points)) return 1;
+
+		return Math.min(100, Math.max(1, Math.round(points)));
+	}
+
+	function getOptionLabel(index: number) {
+		return String.fromCharCode(65 + index);
+	}
+
+	function getTimeLimitSeconds() {
+		const seconds = Number(pack.timeLimitSeconds);
+		if (!Number.isFinite(seconds)) return 0;
+
+		return Math.min(10800, Math.max(0, Math.round(seconds)));
+	}
+
+	function formatQuestionType(type: QuestionType) {
+		if (type === 'true-false') return 'True / false';
+		if (type === 'fill-blank') return 'Fill in the blank';
+
+		return 'Multiple choice';
+	}
+
+	function formatTimer(totalSeconds: number) {
+		const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+		const minutes = Math.floor(safeSeconds / 60);
+		const seconds = safeSeconds % 60;
+
+		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	}
+
+	function normalizeTextAnswer(value: string) {
+		return value.trim().replace(/\s+/g, ' ').toLowerCase();
+	}
+
+	function canSubmitAnswer(currentQuestion?: PlayableQuestion) {
+		if (!currentQuestion || submittedAnswer) return false;
+
+		if (currentQuestion.type === 'multiple-choice') {
+			return currentQuestion.options.some((option) => option.id === selectedOptionId);
+		}
+
+		if (currentQuestion.type === 'true-false') {
+			return trueFalseAnswer !== null;
+		}
+
+		return blankAnswer.trim().length > 0;
+	}
+
+	function getAnswerValue(currentQuestion: PlayableQuestion): AnswerValue {
+		if (currentQuestion.type === 'multiple-choice') return selectedOptionId || null;
+		if (currentQuestion.type === 'true-false') return trueFalseAnswer;
+
+		return blankAnswer;
+	}
+
+	function getCorrectAnswerText(currentQuestion: PlayableQuestion) {
+		if (currentQuestion.type === 'true-false') {
+			return currentQuestion.trueFalseAnswer ? 'True' : 'False';
+		}
+
+		if (currentQuestion.type === 'fill-blank') {
+			return currentQuestion.blankAnswer || 'Accepted answer missing';
+		}
+
+		return (
+			currentQuestion.options.find((option) => option.id === currentQuestion.correctOptionId)?.text ??
+			'Correct answer missing'
+		);
+	}
+
+	function getAnswerText(currentQuestion: PlayableQuestion, value: AnswerValue, timedOut: boolean) {
+		if (timedOut || value === null || value === '') return 'No answer';
+
+		if (currentQuestion.type === 'multiple-choice') {
+			return currentQuestion.options.find((option) => option.id === value)?.text ?? 'No answer';
+		}
+
+		if (currentQuestion.type === 'true-false') {
+			return value ? 'True' : 'False';
+		}
+
+		return String(value).trim();
+	}
+
+	function isAnswerCorrect(
+		currentQuestion: PlayableQuestion,
+		value: AnswerValue,
+		timedOut: boolean
+	) {
+		if (timedOut || value === null || value === '') return false;
+
+		if (currentQuestion.type === 'multiple-choice') {
+			return value === currentQuestion.correctOptionId;
+		}
+
+		if (currentQuestion.type === 'true-false') {
+			return value === currentQuestion.trueFalseAnswer;
+		}
+
+		return (
+			normalizeTextAnswer(String(value)) === normalizeTextAnswer(currentQuestion.blankAnswer)
+		);
+	}
+
+	function createAnswer(
+		currentQuestion: PlayableQuestion,
+		value: AnswerValue,
+		timedOut = false
+	): PlayerAnswer {
+		const isCorrect = isAnswerCorrect(currentQuestion, value, timedOut);
+
+		return {
+			questionId: currentQuestion.id,
+			answerText: getAnswerText(currentQuestion, value, timedOut),
+			correctAnswerText: getCorrectAnswerText(currentQuestion),
+			isCorrect,
+			pointsEarned: isCorrect ? currentQuestion.points : 0,
+			pointsPossible: currentQuestion.points,
+			timedOut
+		};
+	}
+
+	function startRound() {
+		stopTimer();
+		answers = [];
+		finished = false;
+		prepareQuestion(0);
+
+		if (hasTimer && timeMode === 'total') {
+			startTimer(getTimeLimitSeconds());
 		}
 	}
 
-	function restart() {
-		index = 0;
-		selected = null;
-		answers = [];
-		finished = false;
+	function prepareQuestion(nextIndex: number) {
+		index = nextIndex;
+		selectedOptionId = '';
+		trueFalseAnswer = null;
+		blankAnswer = '';
+		submittedAnswer = null;
+
+		if (hasTimer && timeMode === 'per-question') {
+			startTimer(getTimeLimitSeconds());
+		}
+	}
+
+	function startTimer(seconds: number) {
+		stopTimer();
+		secondsRemaining = seconds;
+
+		if (!browser || seconds <= 0) return;
+
+		timerId = window.setInterval(() => {
+			secondsRemaining = Math.max(0, secondsRemaining - 1);
+			if (secondsRemaining <= 0) {
+				handleTimerExpired();
+			}
+		}, 1000);
+	}
+
+	function stopTimer() {
+		if (timerId !== null && browser) {
+			window.clearInterval(timerId);
+		}
+		timerId = null;
+	}
+
+	function handleTimerExpired() {
+		if (finished || !question) return;
+
+		if (timeMode === 'total') {
+			if (!submittedAnswer) {
+				submitAnswer(true);
+			}
+			finishRound();
+			return;
+		}
+
+		if (!submittedAnswer) {
+			submitAnswer(true);
+		}
+	}
+
+	function selectOption(optionId: string) {
+		if (submittedAnswer) return;
+		selectedOptionId = optionId;
+	}
+
+	function setBooleanAnswer(answer: boolean) {
+		if (submittedAnswer) return;
+		trueFalseAnswer = answer;
+	}
+
+	function submitAnswer(timedOut = false) {
+		if (!question || submittedAnswer) return;
+		if (!timedOut && !canSubmit) return;
+
+		const answer = createAnswer(
+			question,
+			timedOut ? null : getAnswerValue(question),
+			timedOut
+		);
+
+		submittedAnswer = answer;
+		answers = [...answers, answer];
+
+		if (!hasTimer || timeMode === 'per-question') {
+			stopTimer();
+		}
+	}
+
+	function continueRound() {
+		if (!submittedAnswer) {
+			submitAnswer();
+			return;
+		}
+
+		if (index + 1 >= questions.length) {
+			finishRound();
+			return;
+		}
+
+		prepareQuestion(index + 1);
+	}
+
+	function finishRound() {
+		const answeredQuestionIds = new Set(answers.map((answer) => answer.questionId));
+		const unansweredAnswers = questions
+			.filter((currentQuestion) => !answeredQuestionIds.has(currentQuestion.id))
+			.map((currentQuestion) => createAnswer(currentQuestion, null, true));
+
+		if (unansweredAnswers.length > 0) {
+			answers = [...answers, ...unansweredAnswers];
+		}
+
+		finished = true;
+		stopTimer();
 	}
 </script>
 
 <div class="container">
-	{#if !finished}
-		<div class="progress-row">
-			<a class="back" href="{base}/">← All packs</a>
-			<span class="progress">Question {index + 1} of {pack.questions.length}</span>
+	{#if questions.length === 0}
+		<div class="empty-card">
+			<a class="back-link" href="{base}/">Back to packs</a>
+			<h1>{pack.title}</h1>
+			<p>This quiz does not have any playable questions yet.</p>
 		</div>
-
-		<h1 class="pack-title">{pack.title}</h1>
-
-		<div class="question-card">
-			<p class="prompt">{question.prompt}</p>
-
-			<div class="choices">
-				{#each question.choices as choice, i (i)}
-					{@const showCorrect = selected !== null && i === question.correctIndex}
-					{@const showWrong = selected === i && i !== question.correctIndex}
-					<button
-						type="button"
-						class="choice"
-						class:selected={selected === i}
-						class:correct={showCorrect}
-						class:wrong={showWrong}
-						disabled={selected !== null}
-						onclick={() => choose(i)}
-					>
-						<span class="letter">{String.fromCharCode(65 + i)}</span>
-						<span class="choice-text">{choice}</span>
-					</button>
-				{/each}
+	{:else if !finished && question}
+		<div class="player-shell">
+			<div class="top-row">
+				<a class="back-link" href="{base}/">Back to packs</a>
+				<div class="top-meta">
+					<span>{progressLabel}</span>
+					{#if hasTimer}
+						<span class:warning={timerWarning} class="timer-pill" aria-live="polite">
+							{timerModeLabel} {timerLabel}
+						</span>
+					{/if}
+				</div>
 			</div>
 
-			{#if selected !== null}
-				<div class="explanation" class:correct={isCorrect} class:wrong={!isCorrect}>
-					<strong>{isCorrect ? 'Correct!' : 'Not quite.'}</strong>
-					{question.explanation}
-				</div>
-				<button type="button" class="next" onclick={next}>
-					{index + 1 >= pack.questions.length ? 'See your score' : 'Next question →'}
-				</button>
-			{/if}
+			<div class="progress-track" aria-hidden="true">
+				<span style={`width: ${progressWidth};`}></span>
+			</div>
+
+			{#key question.id}
+				<article class="question-card">
+					<div class="pack-kicker">
+						<span>{pack.category}</span>
+						<span>{formatQuestionType(question.type)}</span>
+						<span>{question.points} {question.points === 1 ? 'point' : 'points'}</span>
+					</div>
+
+					<h1>{pack.title}</h1>
+					<p class="prompt">{question.prompt}</p>
+
+					{#if question.type === 'multiple-choice'}
+						<div class="choice-list">
+							{#each question.options as option (option.id)}
+								{@const isSelected = selectedOptionId === option.id}
+								{@const showCorrect =
+									!!submittedAnswer && option.id === question.correctOptionId}
+								{@const showWrong =
+									!!submittedAnswer && isSelected && option.id !== question.correctOptionId}
+								<button
+									type="button"
+									class="choice"
+									class:selected={isSelected}
+									class:correct={showCorrect}
+									class:wrong={showWrong}
+									disabled={!!submittedAnswer}
+									onclick={() => selectOption(option.id)}
+								>
+									<span class="letter">{option.label}</span>
+									<span>{option.text}</span>
+								</button>
+							{/each}
+						</div>
+					{:else if question.type === 'true-false'}
+						<div class="boolean-grid">
+							<button
+								type="button"
+								class:selected={trueFalseAnswer === true}
+								class:correct={!!submittedAnswer && question.trueFalseAnswer}
+								class:wrong={!!submittedAnswer && trueFalseAnswer === true && !question.trueFalseAnswer}
+								disabled={!!submittedAnswer}
+								onclick={() => setBooleanAnswer(true)}
+							>
+								True
+							</button>
+							<button
+								type="button"
+								class:selected={trueFalseAnswer === false}
+								class:correct={!!submittedAnswer && !question.trueFalseAnswer}
+								class:wrong={!!submittedAnswer && trueFalseAnswer === false && question.trueFalseAnswer}
+								disabled={!!submittedAnswer}
+								onclick={() => setBooleanAnswer(false)}
+							>
+								False
+							</button>
+						</div>
+					{:else}
+						<label class="blank-answer">
+							<span>Your answer</span>
+							<input
+								type="text"
+								placeholder="Type your answer"
+								bind:value={blankAnswer}
+								disabled={!!submittedAnswer}
+							/>
+						</label>
+					{/if}
+
+					{#if submittedAnswer}
+						<div
+							class="feedback"
+							class:correct={submittedAnswer.isCorrect}
+							class:wrong={!submittedAnswer.isCorrect}
+							aria-live="polite"
+						>
+							<strong>
+								{#if submittedAnswer.timedOut}
+									Time expired.
+								{:else if submittedAnswer.isCorrect}
+									Correct.
+								{:else}
+									Not quite.
+								{/if}
+							</strong>
+							<span>Correct answer: {submittedAnswer.correctAnswerText}</span>
+							{#if question.explanation}
+								<p>{question.explanation}</p>
+							{/if}
+						</div>
+					{/if}
+
+					<div class="action-row">
+						<button
+							type="button"
+							class="primary-button"
+							disabled={!submittedAnswer && !canSubmit}
+							onclick={continueRound}
+						>
+							{#if submittedAnswer}
+								{index + 1 >= questions.length ? 'See score' : 'Next question'}
+							{:else}
+								Submit answer
+							{/if}
+						</button>
+					</div>
+				</article>
+			{/key}
 		</div>
 	{:else}
 		<div class="result-card">
+			<a class="back-link" href="{base}/">Back to packs</a>
 			<p class="result-label">You scored</p>
-			<p class="result-score">{score} <span class="of">/ {pack.questions.length}</span></p>
+			<p class="result-score">{scorePercent}%</p>
+			<p class="result-points">
+				{earnedPoints} of {totalPoints} points - {correctCount} of {questions.length} correct
+			</p>
 			<p class="result-summary">
-				{#if score === pack.questions.length}
-					Perfect round. Send this pack to a friend who thinks they're better.
-				{:else if score >= pack.questions.length * 0.7}
-					Strong showing — try one of the other packs next.
-				{:else if score >= pack.questions.length * 0.4}
-					Not bad. Run it back.
+				{#if scorePercent === 100}
+					Perfect round. Nicely played.
+				{:else if scorePercent >= 70}
+					Strong showing. One more pass and this one is yours.
+				{:else if scorePercent >= 40}
+					Not bad. The explanations should help on the replay.
 				{:else}
-					Rough one. The explanations are there for a reason — give it another go.
+					Rough round. Reset and give it another run.
 				{/if}
 			</p>
 			<div class="result-actions">
-				<button type="button" class="primary" onclick={restart}>Play again</button>
-				<a class="secondary" href="{base}/">Pick another pack</a>
+				<button type="button" class="primary-button" onclick={startRound}>Play again</button>
+				<a class="secondary-button" href="{base}/">Pick another pack</a>
 			</div>
 		</div>
 	{/if}
@@ -106,96 +580,197 @@
 
 <style>
 	.container {
-		max-width: 640px;
+		max-width: 760px;
 		margin: 0 auto;
-		padding: 1rem 1.5rem 3rem;
+		padding: 1rem 1.25rem 3rem;
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		color: #141414;
 	}
 
-	.progress-row {
+	.player-shell {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.top-row,
+	.top-meta,
+	.pack-kicker,
+	.action-row,
+	.result-actions {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.5rem;
-		font-size: 0.85rem;
+		justify-content: space-between;
+		gap: 1rem;
 	}
 
-	.back {
+	.top-row {
+		margin-top: 0.25rem;
+	}
+
+	.back-link {
 		color: #1d4ed8;
+		font-size: 0.9rem;
+		font-weight: 750;
 		text-decoration: none;
-		font-weight: 500;
 	}
 
-	.back:hover {
-		text-decoration: underline;
+	.back-link:hover {
+		color: #0f766e;
 	}
 
-	.progress {
-		color: #888;
+	.top-meta {
+		justify-content: flex-end;
+		color: #666;
+		font-size: 0.86rem;
+		font-weight: 750;
 	}
 
-	.pack-title {
-		font-size: 1rem;
-		font-weight: 600;
-		color: #888;
-		margin: 0 0 0.75rem;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
+	.timer-pill {
+		border: 1px solid #b7e4dc;
+		border-radius: 999px;
+		background: #effcf8;
+		color: #0f766e;
+		padding: 0.42rem 0.7rem;
+		white-space: nowrap;
+	}
+
+	.timer-pill.warning {
+		border-color: #fed7aa;
+		background: #fff7ed;
+		color: #c2410c;
+	}
+
+	.progress-track {
+		overflow: hidden;
+		height: 0.55rem;
+		border-radius: 999px;
+		background: #e5e7eb;
+	}
+
+	.progress-track span {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: #1d4ed8;
+		transition: width 160ms ease;
+	}
+
+	.question-card,
+	.result-card,
+	.empty-card {
+		border: 1px solid #dedede;
+		border-radius: 8px;
+		background: #fff;
+		padding: 1.5rem;
+		box-shadow: 0 12px 30px rgba(20, 20, 20, 0.05);
 	}
 
 	.question-card {
-		background: #fff;
-		border: 1px solid #e2e2e2;
-		border-radius: 12px;
-		padding: 1.75rem;
+		display: grid;
+		gap: 1.25rem;
+		animation: enter-question 180ms ease both;
+	}
+
+	.pack-kicker {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+		color: #666;
+		font-size: 0.78rem;
+		font-weight: 850;
+		text-transform: uppercase;
+	}
+
+	.pack-kicker span {
+		border-radius: 999px;
+		background: #f3f4f6;
+		padding: 0.35rem 0.55rem;
+	}
+
+	h1,
+	p {
+		margin-top: 0;
+	}
+
+	h1 {
+		margin-bottom: 0;
+		color: #666;
+		font-size: 0.95rem;
+		font-weight: 850;
+		letter-spacing: 0;
+		text-transform: uppercase;
 	}
 
 	.prompt {
-		font-size: 1.25rem;
-		font-weight: 600;
+		margin-bottom: 0;
 		color: #111;
-		margin: 0 0 1.5rem;
-		line-height: 1.4;
+		font-size: 1.45rem;
+		font-weight: 850;
+		line-height: 1.35;
+		overflow-wrap: anywhere;
 	}
 
-	.choices {
-		display: flex;
-		flex-direction: column;
-		gap: 0.625rem;
+	.choice-list {
+		display: grid;
+		gap: 0.7rem;
+	}
+
+	.choice,
+	.boolean-grid button,
+	.primary-button,
+	.secondary-button {
+		min-height: 2.8rem;
+		border-radius: 8px;
+		font: inherit;
+		font-weight: 750;
+		cursor: pointer;
+		transition:
+			background 120ms ease,
+			border-color 120ms ease,
+			color 120ms ease,
+			transform 120ms ease;
+	}
+
+	.choice,
+	.boolean-grid button {
+		border: 1.5px solid #d9d9d9;
+		background: #fff;
+		color: #222;
 	}
 
 	.choice {
 		display: flex;
 		align-items: center;
-		gap: 0.875rem;
+		gap: 0.85rem;
+		padding: 0.9rem 1rem;
 		text-align: left;
-		padding: 0.875rem 1rem;
-		border: 1.5px solid #e2e2e2;
-		border-radius: 10px;
-		background: #fff;
-		font: inherit;
-		font-size: 0.95rem;
-		color: #222;
-		cursor: pointer;
-		transition: border-color 100ms ease, background 100ms ease, transform 100ms ease;
 	}
 
-	.choice:not(:disabled):hover {
+	.choice:hover:not(:disabled),
+	.boolean-grid button:hover:not(:disabled) {
 		border-color: #1d4ed8;
-		background: #f5f9ff;
 	}
 
-	.choice:disabled {
+	.choice:disabled,
+	.boolean-grid button:disabled {
 		cursor: default;
 	}
 
-	.choice.correct {
+	.choice.selected,
+	.boolean-grid button.selected {
+		border-color: #1d4ed8;
+		background: #f4f7fb;
+		color: #1741b6;
+	}
+
+	.choice.correct,
+	.boolean-grid button.correct {
 		border-color: #16a34a;
 		background: #f0fdf4;
 		color: #14532d;
 	}
 
-	.choice.wrong {
+	.choice.wrong,
+	.boolean-grid button.wrong {
 		border-color: #dc2626;
 		background: #fef2f2;
 		color: #7f1d1d;
@@ -205,14 +780,14 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 6px;
-		background: #f5f5f5;
-		font-size: 0.8rem;
-		font-weight: 700;
-		color: #555;
 		flex-shrink: 0;
+		width: 1.8rem;
+		height: 1.8rem;
+		border-radius: 6px;
+		background: #eef2ff;
+		color: #1d4ed8;
+		font-size: 0.8rem;
+		font-weight: 850;
 	}
 
 	.choice.correct .letter {
@@ -225,122 +800,192 @@
 		color: #fff;
 	}
 
-	.choice-text {
-		flex: 1;
+	.boolean-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
 	}
 
-	.explanation {
-		margin-top: 1.25rem;
-		padding: 0.875rem 1rem;
+	.blank-answer {
+		display: grid;
+		gap: 0.45rem;
+		max-width: 32rem;
+	}
+
+	.blank-answer span {
+		color: #333;
+		font-size: 0.86rem;
+		font-weight: 750;
+	}
+
+	.blank-answer input {
+		width: 100%;
+		box-sizing: border-box;
+		border: 1px solid #cfcfcf;
 		border-radius: 8px;
-		font-size: 0.9rem;
-		line-height: 1.5;
+		background: #fff;
+		padding: 0.85rem;
+		font: inherit;
+		outline: none;
 	}
 
-	.explanation.correct {
+	.blank-answer input:focus {
+		border-color: #1d4ed8;
+		box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.13);
+	}
+
+	.feedback {
+		display: grid;
+		gap: 0.35rem;
+		border-left: 3px solid #d1d5db;
+		background: #f8fafc;
+		padding: 0.9rem 1rem;
+		line-height: 1.45;
+	}
+
+	.feedback.correct {
+		border-color: #16a34a;
 		background: #f0fdf4;
 		color: #14532d;
 	}
 
-	.explanation.wrong {
+	.feedback.wrong {
+		border-color: #dc2626;
 		background: #fef2f2;
 		color: #7f1d1d;
 	}
 
-	.next {
-		margin-top: 1rem;
-		width: 100%;
+	.feedback p {
+		margin-bottom: 0;
+	}
+
+	.action-row,
+	.result-actions {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.primary-button,
+	.secondary-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid transparent;
 		padding: 0.75rem 1rem;
-		border: none;
-		border-radius: 8px;
+		text-decoration: none;
+	}
+
+	.primary-button {
 		background: #1d4ed8;
 		color: #fff;
-		font: inherit;
-		font-weight: 600;
-		font-size: 0.95rem;
-		cursor: pointer;
-		transition: background 100ms ease;
 	}
 
-	.next:hover {
-		background: #1e40af;
+	.primary-button:hover:not(:disabled) {
+		background: #1741b6;
+		transform: translateY(-1px);
 	}
 
-	.result-card {
-		text-align: center;
+	.primary-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.secondary-button {
+		border-color: #cfcfcf;
 		background: #fff;
-		border: 1px solid #e2e2e2;
-		border-radius: 12px;
-		padding: 3rem 2rem;
+		color: #222;
+	}
+
+	.secondary-button:hover {
+		border-color: #1d4ed8;
+		color: #1d4ed8;
+	}
+
+	.result-card,
+	.empty-card {
+		display: grid;
+		gap: 1rem;
 		margin-top: 1rem;
+		text-align: center;
+		justify-items: center;
 	}
 
 	.result-label {
-		color: #888;
-		font-size: 0.9rem;
-		font-weight: 600;
+		margin-bottom: -0.25rem;
+		color: #666;
+		font-size: 0.82rem;
+		font-weight: 850;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		margin: 0 0 0.5rem;
 	}
 
 	.result-score {
-		font-size: 4rem;
-		font-weight: 800;
+		margin-bottom: 0;
 		color: #1d4ed8;
-		margin: 0;
+		font-size: 4rem;
+		font-weight: 850;
 		line-height: 1;
 	}
 
-	.result-score .of {
-		color: #888;
-		font-weight: 400;
-		font-size: 2rem;
+	.result-points {
+		margin-bottom: 0;
+		color: #333;
+		font-weight: 800;
 	}
 
-	.result-summary {
+	.result-summary,
+	.empty-card p {
+		max-width: 38ch;
+		margin-bottom: 0;
 		color: #555;
-		font-size: 1rem;
-		margin: 1.5rem auto 2rem;
-		max-width: 36ch;
 		line-height: 1.5;
 	}
 
-	.result-actions {
-		display: flex;
-		gap: 0.75rem;
-		justify-content: center;
+	@keyframes enter-question {
+		from {
+			opacity: 0;
+			transform: translateY(0.4rem);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
-	.primary, .secondary {
-		padding: 0.75rem 1.25rem;
-		border-radius: 8px;
-		font: inherit;
-		font-weight: 600;
-		font-size: 0.95rem;
-		cursor: pointer;
-		text-decoration: none;
-		display: inline-flex;
-		align-items: center;
-	}
+	@media (max-width: 620px) {
+		.container {
+			padding: 0.85rem 1rem 2rem;
+		}
 
-	.primary {
-		background: #1d4ed8;
-		color: #fff;
-		border: none;
-	}
+		.top-row,
+		.top-meta,
+		.action-row,
+		.result-actions {
+			align-items: flex-start;
+			flex-direction: column;
+		}
 
-	.primary:hover {
-		background: #1e40af;
-	}
+		.question-card,
+		.result-card,
+		.empty-card {
+			padding: 1.1rem;
+		}
 
-	.secondary {
-		background: #fff;
-		color: #1d4ed8;
-		border: 1.5px solid #1d4ed8;
-	}
+		.prompt {
+			font-size: 1.2rem;
+		}
 
-	.secondary:hover {
-		background: #f5f9ff;
+		.boolean-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.primary-button,
+		.secondary-button {
+			width: 100%;
+		}
+
+		.result-score {
+			font-size: 3rem;
+		}
 	}
 </style>
