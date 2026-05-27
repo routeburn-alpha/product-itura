@@ -1,20 +1,50 @@
 import { readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
-export type Question = {
+export type QuestionType = 'multiple-choice' | 'true-false' | 'fill-blank';
+export type TimeMode = 'per-question' | 'total';
+
+export type QuestionOption = {
+	id: string;
+	text: string;
+};
+
+type BaseQuestion = {
 	id: string;
 	prompt: string;
-	choices: [string, string, string, string];
-	correctIndex: 0 | 1 | 2 | 3;
-	difficulty: 1 | 2 | 3;
+	type?: QuestionType;
+	difficulty?: 1 | 2 | 3;
 	explanation: string;
 };
+
+export type MultipleChoiceQuestion = BaseQuestion & {
+	type?: 'multiple-choice';
+	choices?: string[];
+	options?: QuestionOption[];
+	correctIndex?: number;
+	correctOptionId?: string;
+};
+
+export type TrueFalseQuestion = BaseQuestion & {
+	type: 'true-false';
+	trueFalseAnswer: boolean;
+};
+
+export type FillBlankQuestion = BaseQuestion & {
+	type: 'fill-blank';
+	blankAnswer: string;
+};
+
+export type Question = MultipleChoiceQuestion | TrueFalseQuestion | FillBlankQuestion;
 
 export type Pack = {
 	id: string;
 	title: string;
 	category: string;
 	description: string;
+	hasTimeLimit?: boolean;
+	timeLimitSeconds?: number;
+	timeMode?: TimeMode;
 	questions: Question[];
 };
 
