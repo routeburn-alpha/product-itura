@@ -70,12 +70,25 @@
 
 	type StoredQuizDraft = Partial<QuizDraft> & {
 		timeLimitMinutes?: unknown;
+		quizStatus?: QuizStatus;
+		lastManualSaveAt?: string;
 		questionBuilder?: StoredQuestionBuilder;
 	};
+
+	type QuizStatus = 'draft' | 'published';
+	type FeedbackTone = 'neutral' | 'success' | 'error';
+	type MoveDirection = 'up' | 'down';
 
 	let draft = $state<QuizDraft>(createDefaultDraft());
 	let questionDraft = $state<QuestionDraft>(createQuestionDraft());
 	let savedQuestions = $state<SavedQuestion[]>([]);
+	let editingQuestionId = $state<string | null>(null);
+	let draggingQuestionId = $state<string | null>(null);
+	let dragOverQuestionId = $state<string | null>(null);
+	let quizStatus = $state<QuizStatus>('draft');
+	let lastManualSaveAt = $state('');
+	let managementFeedback = $state('');
+	let managementFeedbackTone = $state<FeedbackTone>('neutral');
 	let attemptedSubmit = $state(false);
 	let attemptedQuestionSave = $state(false);
 	let draftReady = $state(false);
@@ -117,6 +130,21 @@
 	const savedQuestionCountLabel = $derived(
 		`${savedQuestions.length} ${savedQuestions.length === 1 ? 'question' : 'questions'}`
 	);
+	const totalPoints = $derived(
+		savedQuestions.reduce((total, question) => total + normalizePoints(question.points), 0)
+	);
+	const quizStatusLabel = $derived(quizStatus === 'published' ? 'Published' : 'Draft');
+	const lastManualSaveLabel = $derived(
+		lastManualSaveAt ? `Saved ${formatTimestamp(lastManualSaveAt)}` : 'No manual save yet'
+	);
+	const publishBlockReason = $derived(
+		!isValid
+			? 'Resolve setup errors before publishing.'
+			: savedQuestions.length === 0
+				? 'Add at least one question before publishing.'
+				: ''
+	);
+	const saveQuestionLabel = $derived(editingQuestionId ? 'Update question' : 'Save question');
 	const draftSnapshot = $derived({
 		title: draft.title,
 		description: draft.description,
@@ -387,6 +415,9 @@
 				};
 				questionDraft = normalizeQuestionDraft(parsed.questionBuilder?.current);
 				savedQuestions = normalizeSavedQuestions(parsed.questionBuilder?.questions);
+				quizStatus = parsed.quizStatus === 'published' ? 'published' : 'draft';
+				lastManualSaveAt =
+					typeof parsed.lastManualSaveAt === 'string' ? parsed.lastManualSaveAt : '';
 				saveState = 'loaded';
 			} catch {
 				localStorage.removeItem(draftKey);
@@ -402,6 +433,8 @@
 		const snapshot = {
 			...draftSnapshot,
 			questionBuilder: questionSnapshot,
+			quizStatus,
+			lastManualSaveAt,
 			title: draftSnapshot.title.trimStart(),
 			updatedAt: new Date().toISOString()
 		};
@@ -448,6 +481,13 @@
 		draft = createDefaultDraft();
 		questionDraft = createQuestionDraft();
 		savedQuestions = [];
+		editingQuestionId = null;
+		draggingQuestionId = null;
+		dragOverQuestionId = null;
+		quizStatus = 'draft';
+		lastManualSaveAt = '';
+		managementFeedback = '';
+		managementFeedbackTone = 'neutral';
 		attemptedSubmit = false;
 		attemptedQuestionSave = false;
 		builderReady = false;
@@ -514,7 +554,18 @@
 		attemptedQuestionSave = true;
 		if (!canSaveQuestion) return;
 
-		savedQuestions = [...savedQuestions, createSavedQuestion()];
+		const savedQuestion = createSavedQuestion(editingQuestionId ?? undefined);
+		if (editingQuestionId) {
+			savedQuestions = savedQuestions.map((question) =>
+				question.id === editingQuestionId ? savedQuestion : question
+			);
+			editingQuestionId = null;
+			markDraftChanged('Question updated.');
+		} else {
+			savedQuestions = [...savedQuestions, savedQuestion];
+			markDraftChanged('Question saved.');
+		}
+
 		questionDraft = createQuestionDraft(questionDraft.type);
 		attemptedQuestionSave = false;
 
@@ -523,7 +574,7 @@
 		}
 	}
 
-	function createSavedQuestion(): SavedQuestion {
+	function createSavedQuestion(questionId = createId('question')): SavedQuestion {
 		const normalizedQuestion = serializeQuestionDraft(questionDraft);
 		normalizedQuestion.promptHtml = normalizedQuestion.promptHtml.trim();
 		normalizedQuestion.options = normalizedQuestion.options.map((option) => ({
@@ -536,7 +587,7 @@
 
 		return {
 			...normalizedQuestion,
-			id: createId('question'),
+			id: questionId,
 			promptText
 		};
 	}
@@ -544,6 +595,141 @@
 	function clearQuestion() {
 		questionDraft = createQuestionDraft(questionDraft.type);
 		attemptedQuestionSave = false;
+		if (editingQuestionId) {
+			editingQuestionId = null;
+			setManagementFeedback('Editing canceled.', 'neutral');
+		}
+	}
+
+	function editSavedQuestion(questionId: string) {
+		const question = savedQuestions.find((savedQuestion) => savedQuestion.id === questionId);
+		if (!question) return;
+
+		questionDraft = serializeQuestionDraft(question);
+		editingQuestionId = questionId;
+		builderReady = true;
+		attemptedQuestionSave = false;
+		setManagementFeedback(`Editing question ${getQuestionPosition(questionId)}.`, 'neutral');
+
+		if (browser) {
+			setTimeout(() => promptEditor?.focus(), 0);
+		}
+	}
+
+	function deleteSavedQuestion(questionId: string) {
+		savedQuestions = savedQuestions.filter((question) => question.id !== questionId);
+		if (editingQuestionId === questionId) {
+			editingQuestionId = null;
+			questionDraft = createQuestionDraft();
+		}
+		markDraftChanged('Question deleted.');
+	}
+
+	function moveQuestion(questionId: string, direction: MoveDirection) {
+		const currentIndex = savedQuestions.findIndex((question) => question.id === questionId);
+		const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+		if (currentIndex < 0 || targetIndex < 0 || targetIndex >= savedQuestions.length) return;
+
+		const nextQuestions = [...savedQuestions];
+		const [movedQuestion] = nextQuestions.splice(currentIndex, 1);
+		nextQuestions.splice(targetIndex, 0, movedQuestion);
+		savedQuestions = nextQuestions;
+		markDraftChanged('Question order updated.');
+	}
+
+	function handleQuestionDragStart(event: DragEvent, questionId: string) {
+		draggingQuestionId = questionId;
+		dragOverQuestionId = null;
+		event.dataTransfer?.setData('text/plain', questionId);
+		if (event.dataTransfer) {
+			event.dataTransfer.effectAllowed = 'move';
+		}
+	}
+
+	function handleQuestionDragOver(event: DragEvent, questionId: string) {
+		event.preventDefault();
+		if (questionId !== draggingQuestionId) {
+			dragOverQuestionId = questionId;
+		}
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+	}
+
+	function handleQuestionDragLeave(questionId: string) {
+		if (dragOverQuestionId === questionId) {
+			dragOverQuestionId = null;
+		}
+	}
+
+	function handleQuestionDrop(event: DragEvent, targetQuestionId: string) {
+		event.preventDefault();
+		const sourceQuestionId = event.dataTransfer?.getData('text/plain') || draggingQuestionId;
+		if (sourceQuestionId) {
+			reorderQuestion(sourceQuestionId, targetQuestionId);
+		}
+		handleQuestionDragEnd();
+	}
+
+	function handleQuestionDragEnd() {
+		draggingQuestionId = null;
+		dragOverQuestionId = null;
+	}
+
+	function reorderQuestion(sourceQuestionId: string, targetQuestionId: string) {
+		if (sourceQuestionId === targetQuestionId) return;
+
+		const sourceIndex = savedQuestions.findIndex((question) => question.id === sourceQuestionId);
+		const targetIndex = savedQuestions.findIndex((question) => question.id === targetQuestionId);
+		if (sourceIndex < 0 || targetIndex < 0) return;
+
+		const nextQuestions = [...savedQuestions];
+		const [movedQuestion] = nextQuestions.splice(sourceIndex, 1);
+		nextQuestions.splice(targetIndex, 0, movedQuestion);
+		savedQuestions = nextQuestions;
+		markDraftChanged('Question order updated.');
+	}
+
+	function saveDraftManually() {
+		quizStatus = 'draft';
+		lastManualSaveAt = new Date().toISOString();
+		setManagementFeedback('Draft saved locally.');
+	}
+
+	function publishQuiz() {
+		attemptedSubmit = true;
+		if (publishBlockReason) {
+			setManagementFeedback(publishBlockReason, 'error');
+			return;
+		}
+
+		quizStatus = 'published';
+		lastManualSaveAt = new Date().toISOString();
+		setManagementFeedback('Quiz published locally.');
+	}
+
+	function markDraftChanged(message: string) {
+		if (quizStatus === 'published') {
+			quizStatus = 'draft';
+		}
+		setManagementFeedback(message);
+	}
+
+	function setManagementFeedback(message: string, tone: FeedbackTone = 'success') {
+		managementFeedback = message;
+		managementFeedbackTone = tone;
+	}
+
+	function getQuestionPosition(questionId: string) {
+		const index = savedQuestions.findIndex((question) => question.id === questionId);
+		return index >= 0 ? index + 1 : savedQuestions.length + 1;
+	}
+
+	function formatTimestamp(value: string) {
+		return new Date(value).toLocaleTimeString([], {
+			hour: 'numeric',
+			minute: '2-digit'
+		});
 	}
 </script>
 
@@ -709,6 +895,12 @@
 							{/each}
 						</div>
 					</div>
+
+					{#if editingQuestionId}
+						<div class="editing-banner" role="status">
+							<span>Editing question {getQuestionPosition(editingQuestionId)}</span>
+						</div>
+					{/if}
 
 					<div class="field">
 						<span>Question text</span>
@@ -888,8 +1080,10 @@
 					{/if}
 
 					<div class="form-actions builder-submit">
-						<button type="button" class="primary-button" onclick={saveQuestion}>Save question</button>
-						<button type="button" class="secondary-button" onclick={clearQuestion}>Clear</button>
+						<button type="button" class="primary-button" onclick={saveQuestion}>{saveQuestionLabel}</button>
+						<button type="button" class="secondary-button" onclick={clearQuestion}>
+							{editingQuestionId ? 'Cancel edit' : 'Clear'}
+						</button>
 					</div>
 
 					<div class="saved-questions">
@@ -924,6 +1118,109 @@
 				</div>
 			{/if}
 		</section>
+
+		<section class="management-panel" aria-labelledby="management-title">
+			<div class="panel-heading">
+				<div>
+					<p class="step-label">Step 3</p>
+					<h2 id="management-title">Quiz management</h2>
+				</div>
+				<span class="status-pill" class:published={quizStatus === 'published'}>{quizStatusLabel}</span>
+			</div>
+
+			<div class="management-summary" aria-label="Quiz summary">
+				<div>
+					<span>Questions</span>
+					<strong>{savedQuestions.length}</strong>
+				</div>
+				<div>
+					<span>Points</span>
+					<strong>{totalPoints}</strong>
+				</div>
+				<div>
+					<span>Manual save</span>
+					<strong>{lastManualSaveLabel}</strong>
+				</div>
+			</div>
+
+			<div class="management-toolbar">
+				<div class="management-actions">
+					<button type="button" class="secondary-button" onclick={saveDraftManually}>Save draft</button>
+					<button type="button" class="primary-button" onclick={publishQuiz}>Publish</button>
+				</div>
+
+				{#if managementFeedback}
+					<p class:error={managementFeedbackTone === 'error'} class="management-feedback">
+						{managementFeedback}
+					</p>
+				{/if}
+			</div>
+
+			{#if savedQuestions.length > 0}
+				<ol class="managed-question-list">
+					{#each savedQuestions as question, index (question.id)}
+						<li
+							class:dragging={draggingQuestionId === question.id}
+							class:drag-over={dragOverQuestionId === question.id}
+							draggable="true"
+							ondragstart={(event) => handleQuestionDragStart(event, question.id)}
+							ondragover={(event) => handleQuestionDragOver(event, question.id)}
+							ondragleave={() => handleQuestionDragLeave(question.id)}
+							ondrop={(event) => handleQuestionDrop(event, question.id)}
+							ondragend={handleQuestionDragEnd}
+						>
+							<div class="managed-question-order">
+								<span>{index + 1}</span>
+								<span class="drag-handle" aria-hidden="true">::</span>
+							</div>
+
+							<div class="managed-question-body">
+								<div class="managed-question-copy">
+									<strong>{question.promptText}</strong>
+									<span>
+										{formatQuestionType(question.type)} - {question.points}
+										{question.points === 1 ? 'point' : 'points'} - {getCorrectAnswerPreview(question)}
+									</span>
+								</div>
+
+								<div class="managed-question-actions">
+									<button type="button" class="secondary-button" onclick={() => editSavedQuestion(question.id)}>
+										Edit
+									</button>
+									<button
+										type="button"
+										class="secondary-button"
+										disabled={index === 0}
+										onclick={() => moveQuestion(question.id, 'up')}
+									>
+										Up
+									</button>
+									<button
+										type="button"
+										class="secondary-button"
+										disabled={index === savedQuestions.length - 1}
+										onclick={() => moveQuestion(question.id, 'down')}
+									>
+										Down
+									</button>
+									<button
+										type="button"
+										class="danger-button"
+										onclick={() => deleteSavedQuestion(question.id)}
+									>
+										Delete
+									</button>
+								</div>
+							</div>
+						</li>
+					{/each}
+				</ol>
+			{:else}
+				<div class="management-empty">
+					<p>No questions saved yet.</p>
+				</div>
+			{/if}
+		</section>
 	</main>
 </div>
 
@@ -941,7 +1238,10 @@
 	.form-actions,
 	.header-actions,
 	.answer-heading,
-	.saved-heading {
+	.saved-heading,
+	.management-toolbar,
+	.management-actions,
+	.managed-question-actions {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -1015,7 +1315,8 @@
 	}
 
 	.setup-panel,
-	.builder-panel {
+	.builder-panel,
+	.management-panel {
 		border: 1px solid #dedede;
 		border-radius: 8px;
 		background: #fff;
@@ -1033,12 +1334,19 @@
 		border-color: #7dd3c7;
 	}
 
+	.management-panel {
+		grid-column: 1 / -1;
+		display: grid;
+		gap: 1rem;
+	}
+
 	.text-button,
 	.primary-button,
 	.secondary-button,
 	.segmented button,
 	.rich-toolbar button,
-	.remove-button {
+	.remove-button,
+	.danger-button {
 		min-height: 2.5rem;
 		border-radius: 8px;
 		font: inherit;
@@ -1205,7 +1513,8 @@
 	}
 
 	.primary-button,
-	.secondary-button {
+	.secondary-button,
+	.danger-button {
 		border: 1px solid transparent;
 		padding: 0.7rem 1rem;
 		text-decoration: none;
@@ -1232,14 +1541,35 @@
 		color: #1d4ed8;
 	}
 
-	.secondary-button:disabled {
+	.secondary-button:disabled,
+	.danger-button:disabled {
 		color: #999;
 		cursor: not-allowed;
+	}
+
+	.danger-button {
+		background: #fff;
+		border-color: #efcaca;
+		color: #b91c1c;
+	}
+
+	.danger-button:hover:not(:disabled) {
+		border-color: #b91c1c;
+		background: #fff5f5;
 	}
 
 	.validation-note {
 		color: #666;
 		font-size: 0.85rem;
+	}
+
+	.editing-banner {
+		border-left: 3px solid #1d4ed8;
+		background: #f4f7fb;
+		color: #1741b6;
+		padding: 0.75rem 0.85rem;
+		font-size: 0.88rem;
+		font-weight: 800;
 	}
 
 	.rich-editor {
@@ -1434,6 +1764,169 @@
 		overflow-wrap: anywhere;
 	}
 
+	.status-pill {
+		flex-shrink: 0;
+		border: 1px solid #d5d5d5;
+		border-radius: 999px;
+		background: #f7f7f7;
+		color: #555;
+		padding: 0.45rem 0.75rem;
+		font-size: 0.82rem;
+		font-weight: 800;
+	}
+
+	.status-pill.published {
+		border-color: #b7e4dc;
+		background: #effcf8;
+		color: #0f766e;
+	}
+
+	.management-summary {
+		display: grid;
+		grid-template-columns: 0.7fr 0.7fr 1.6fr;
+		gap: 1rem;
+		border-top: 1px solid #ececec;
+		border-bottom: 1px solid #ececec;
+		padding: 1rem 0;
+	}
+
+	.management-summary div {
+		display: grid;
+		gap: 0.2rem;
+	}
+
+	.management-summary span {
+		color: #666;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0;
+		text-transform: uppercase;
+	}
+
+	.management-summary strong {
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+
+	.management-toolbar {
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.management-actions,
+	.managed-question-actions {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+		gap: 0.55rem;
+	}
+
+	.management-feedback {
+		margin: 0;
+		color: #0f766e;
+		font-size: 0.88rem;
+		font-weight: 750;
+		line-height: 1.45;
+	}
+
+	.management-feedback.error {
+		color: #b91c1c;
+	}
+
+	.managed-question-list {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.managed-question-list li {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 0.85rem;
+		border: 1px solid #dedede;
+		border-radius: 8px;
+		background: #fff;
+		padding: 0.85rem;
+		transition:
+			border-color 120ms ease,
+			box-shadow 120ms ease,
+			opacity 120ms ease;
+	}
+
+	.managed-question-list li.dragging {
+		opacity: 0.55;
+	}
+
+	.managed-question-list li.drag-over {
+		border-color: #1d4ed8;
+		box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.13);
+	}
+
+	.managed-question-order {
+		display: grid;
+		align-content: start;
+		justify-items: center;
+		gap: 0.35rem;
+		color: #0f766e;
+		font-weight: 850;
+	}
+
+	.managed-question-order > span:first-child {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 999px;
+		background: #effcf8;
+	}
+
+	.drag-handle {
+		color: #777;
+		cursor: grab;
+		font-size: 1rem;
+		letter-spacing: 0;
+		line-height: 1;
+	}
+
+	.managed-question-body,
+	.managed-question-copy {
+		display: grid;
+		min-width: 0;
+	}
+
+	.managed-question-body {
+		gap: 0.85rem;
+	}
+
+	.managed-question-copy {
+		gap: 0.25rem;
+	}
+
+	.managed-question-copy strong {
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+
+	.managed-question-copy span {
+		color: #666;
+		font-size: 0.82rem;
+		font-weight: 750;
+		line-height: 1.4;
+		overflow-wrap: anywhere;
+	}
+
+	.management-empty {
+		border-top: 1px solid #ececec;
+		padding-top: 1rem;
+	}
+
+	.management-empty p {
+		margin-bottom: 0;
+		color: #666;
+	}
+
 	.empty-state {
 		margin: 1rem 0;
 		color: #666;
@@ -1465,6 +1958,7 @@
 		.field-grid,
 		.time-controls,
 		.builder-meta,
+		.management-summary,
 		.header-actions {
 			display: grid;
 			grid-template-columns: 1fr;
@@ -1487,7 +1981,10 @@
 		.page-header,
 		.panel-heading,
 		.form-actions,
-		.header-actions {
+		.header-actions,
+		.management-toolbar,
+		.management-actions,
+		.managed-question-actions {
 			align-items: flex-start;
 			flex-direction: column;
 		}
@@ -1501,7 +1998,8 @@
 		}
 
 		.primary-button,
-		.secondary-button {
+		.secondary-button,
+		.danger-button {
 			width: 100%;
 		}
 
@@ -1532,6 +2030,16 @@
 
 		.correct-choice {
 			width: fit-content;
+		}
+
+		.managed-question-list li {
+			grid-template-columns: 1fr;
+		}
+
+		.managed-question-order {
+			align-items: center;
+			display: flex;
+			justify-content: space-between;
 		}
 	}
 </style>
