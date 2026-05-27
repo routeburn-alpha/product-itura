@@ -92,6 +92,28 @@
 		timedOut: boolean;
 		explanation: string;
 	};
+	type SharedQuestion = {
+		id: string;
+		type: QuestionType;
+		prompt: string;
+		difficulty: 1 | 2 | 3;
+		explanation: string;
+		points: number;
+		options?: QuestionOption[];
+		correctOptionId?: string;
+		trueFalseAnswer?: boolean;
+		blankAnswer?: string;
+	};
+	type SharedQuizPayload = {
+		id: string;
+		title: string;
+		category: string;
+		description: string;
+		hasTimeLimit: boolean;
+		timeLimitSeconds: number;
+		timeMode: TimeMode;
+		questions: SharedQuestion[];
+	};
 
 	let draft = $state<QuizDraft>(createDefaultDraft());
 	let questionDraft = $state<QuestionDraft>(createQuestionDraft());
@@ -197,6 +219,11 @@
 	const previewTimerLabel = $derived(formatTimer(previewSecondsRemaining));
 	const previewTimerWarning = $derived(
 		draft.hasTimeLimit && previewSecondsRemaining > 0 && previewSecondsRemaining <= 10
+	);
+	const shareLink = $derived(createShareLink());
+	const canShareQuiz = $derived(quizStatus === 'published' && !publishBlockReason);
+	const shareStatusLabel = $derived(
+		canShareQuiz ? 'Ready to share' : 'Publish this quiz to generate a public link.'
 	);
 	const draftSnapshot = $derived({
 		title: draft.title,
@@ -409,6 +436,98 @@
 		const seconds = safeSeconds % 60;
 
 		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	}
+
+	function getSharedDifficulty(): 1 | 2 | 3 {
+		if (draft.difficulty === 'Hard') return 3;
+		if (draft.difficulty === 'Medium') return 2;
+
+		return 1;
+	}
+
+	function createShareSlug(value: string) {
+		const slug = value
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '');
+
+		return slug || 'shared-quiz';
+	}
+
+	function createSharedQuestion(question: SavedQuestion): SharedQuestion {
+		const sharedQuestion = {
+			id: question.id,
+			type: question.type,
+			prompt: question.promptText,
+			difficulty: getSharedDifficulty(),
+			explanation: question.explanation,
+			points: normalizePoints(question.points)
+		};
+
+		if (question.type === 'true-false') {
+			return {
+				...sharedQuestion,
+				trueFalseAnswer: question.trueFalseAnswer
+			};
+		}
+
+		if (question.type === 'fill-blank') {
+			return {
+				...sharedQuestion,
+				blankAnswer: question.blankAnswer
+			};
+		}
+
+		return {
+			...sharedQuestion,
+			options: question.options.map((option) => ({
+				id: option.id,
+				text: option.text
+			})),
+			correctOptionId: question.correctOptionId
+		};
+	}
+
+	function createSharePayload(): SharedQuizPayload {
+		return {
+			id: createShareSlug(draft.title),
+			title: draft.title,
+			category: draft.category,
+			description: draft.description,
+			hasTimeLimit: draft.hasTimeLimit,
+			timeLimitSeconds: draft.hasTimeLimit ? getNormalizedTimeLimitSeconds() : 0,
+			timeMode: draft.timeMode,
+			questions: savedQuestions.map(createSharedQuestion)
+		};
+	}
+
+	function encodeSharePayload(payload: SharedQuizPayload) {
+		const json = JSON.stringify(payload);
+		const bytes = new TextEncoder().encode(json);
+		const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');
+
+		return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+	}
+
+	function createShareLink() {
+		if (!browser || quizStatus !== 'published' || publishBlockReason) return '';
+
+		const url = new URL(`${base}/play/shared`, window.location.origin);
+		url.hash = `quiz=${encodeSharePayload(createSharePayload())}`;
+
+		return url.toString();
+	}
+
+	async function copyShareLink() {
+		if (!shareLink) return;
+
+		try {
+			await navigator.clipboard.writeText(shareLink);
+			setManagementFeedback('Share link copied.');
+		} catch {
+			setManagementFeedback('Could not copy the share link.', 'error');
+		}
 	}
 
 	function getNormalizedTimeLimitSeconds() {
@@ -1493,6 +1612,33 @@
 				{/if}
 			</div>
 
+			<section class="share-panel" aria-labelledby="share-title">
+				<div class="share-heading">
+					<div>
+						<p class="step-label">Share settings</p>
+						<h3 id="share-title">Public link</h3>
+					</div>
+					<span class:ready={canShareQuiz}>{shareStatusLabel}</span>
+				</div>
+
+				{#if canShareQuiz}
+					<div class="share-link-row">
+						<label class="field">
+							<span>Quiz URL</span>
+							<input type="text" readonly value={shareLink} />
+						</label>
+						<div class="share-actions">
+							<button type="button" class="secondary-button" onclick={copyShareLink}>Copy link</button>
+							{#if shareLink}
+								<a class="primary-button" href={shareLink} target="_blank" rel="noopener">Open link</a>
+							{/if}
+						</div>
+					</div>
+				{:else}
+					<p class="share-empty">Resolve setup errors, add questions, and publish to create a public quiz URL.</p>
+				{/if}
+			</section>
+
 			{#if isPreviewActive}
 				<section class="preview-area" aria-labelledby="preview-title" bind:this={previewPanel}>
 					<div class="preview-topbar">
@@ -1758,6 +1904,8 @@
 	.saved-heading,
 	.management-toolbar,
 	.management-actions,
+	.share-heading,
+	.share-actions,
 	.managed-question-actions {
 		display: flex;
 		align-items: center;
@@ -1781,6 +1929,7 @@
 
 	h1,
 	h2,
+	h3,
 	p {
 		margin-top: 0;
 	}
@@ -1797,6 +1946,13 @@
 		margin-bottom: 0;
 		font-size: 1.25rem;
 		line-height: 1.2;
+		letter-spacing: 0;
+	}
+
+	h3 {
+		margin-bottom: 0;
+		font-size: 1.08rem;
+		line-height: 1.25;
 		letter-spacing: 0;
 	}
 
@@ -2349,6 +2505,53 @@
 		color: #b91c1c;
 	}
 
+	.share-panel {
+		display: grid;
+		gap: 1rem;
+		border-top: 1px solid #ececec;
+		border-bottom: 1px solid #ececec;
+		padding: 1rem 0;
+	}
+
+	.share-heading > span {
+		border: 1px solid #d5d5d5;
+		border-radius: 999px;
+		background: #f7f7f7;
+		color: #555;
+		padding: 0.45rem 0.75rem;
+		font-size: 0.82rem;
+		font-weight: 800;
+	}
+
+	.share-heading > span.ready {
+		border-color: #b7e4dc;
+		background: #effcf8;
+		color: #0f766e;
+	}
+
+	.share-link-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 1rem;
+		align-items: end;
+	}
+
+	.share-link-row input {
+		font-size: 0.86rem;
+	}
+
+	.share-actions {
+		justify-content: flex-end;
+		flex-wrap: wrap;
+		gap: 0.55rem;
+	}
+
+	.share-empty {
+		margin-bottom: 0;
+		color: #666;
+		line-height: 1.5;
+	}
+
 	.preview-area {
 		display: grid;
 		gap: 1rem;
@@ -2815,6 +3018,8 @@
 		.header-actions,
 		.management-toolbar,
 		.management-actions,
+		.share-heading,
+		.share-actions,
 		.managed-question-actions,
 		.preview-topbar,
 		.preview-meta,
@@ -2826,6 +3031,10 @@
 
 		.form-actions {
 			gap: 0.65rem;
+		}
+
+		.share-link-row {
+			grid-template-columns: 1fr;
 		}
 
 		h1 {

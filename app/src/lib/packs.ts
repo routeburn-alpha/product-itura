@@ -15,6 +15,7 @@ type BaseQuestion = {
 	type?: QuestionType;
 	difficulty?: 1 | 2 | 3;
 	explanation: string;
+	points?: number;
 };
 
 export type MultipleChoiceQuestion = BaseQuestion & {
