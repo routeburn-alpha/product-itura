@@ -8,6 +8,9 @@ This guide turns the findings from [`ui-audit.md`](./ui-audit.md) and the
 inventory in [`ui-component-inventory.md`](./ui-component-inventory.md) into a
 single standard. Runtime CSS should adopt these values in task #13.
 
+For the centralized usage guide that consolidates these decisions into review
+rules, examples, and component guidance, see [`design-system.md`](./design-system.md).
+
 ## Design Principles
 
 1. **Use one palette.** The product palette is black, green, white, and
