@@ -163,40 +163,39 @@
 
 <style>
 	.container {
-		max-width: 720px;
+		max-width: var(--content-narrow);
 		margin: 0 auto;
-		padding: 1.25rem;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-		color: #141414;
+		padding: var(--space-5);
+		color: var(--color-text);
 	}
 
 	.share-card {
 		display: grid;
 		gap: 0.8rem;
-		border: 1px solid #dedede;
-		border-radius: 8px;
-		background: #fff;
-		padding: 1.5rem;
-		box-shadow: 0 12px 30px rgba(20, 20, 20, 0.05);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		padding: var(--space-6);
+		box-shadow: var(--shadow-card);
 	}
 
 	.back-link {
 		width: fit-content;
-		color: #1d4ed8;
-		font-size: 0.9rem;
-		font-weight: 750;
+		color: var(--color-green);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
 		text-decoration: none;
 	}
 
 	.back-link:hover {
-		color: #0f766e;
+		color: var(--color-green);
 	}
 
 	.eyebrow {
 		margin: 0;
-		color: #0f766e;
-		font-size: 0.74rem;
-		font-weight: 800;
+		color: var(--color-green);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-bold);
 		letter-spacing: 0;
 		text-transform: uppercase;
 	}
@@ -208,14 +207,14 @@
 
 	h1 {
 		margin-bottom: 0;
-		font-size: 2rem;
+		font-size: var(--font-size-2xl);
 		line-height: 1.1;
 		letter-spacing: 0;
 	}
 
 	p:last-child {
 		margin-bottom: 0;
-		color: #555;
+		color: var(--color-text-muted);
 		line-height: 1.5;
 	}
 </style>
