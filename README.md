@@ -21,7 +21,7 @@ Open `http://localhost:5173`.
 - Two seeded packs: **Premier League Trivia** and **NYT-Easy Trivia**
 - A pack picker home page (`/`)
 - A play screen (`/play/[pack]`) with one-question-at-a-time scoring
-- UI cleanup docs in `docs/`: audit, component inventory, and style guide
+- UI cleanup docs in `docs/`: [design system](./docs/design-system.md), audit, component inventory, and style guide
 - `.mcp.json` pre-wired for the studio-ai MCP server so an agent can pick up tasks against this repo, but will need token (get from Admin) - this should be added to your .gitignore file once token is entered
 - GitHub Pages deploy + PR-preview workflows in `.github/workflows/`
 
