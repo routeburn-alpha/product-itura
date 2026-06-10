@@ -22,7 +22,7 @@ There is intentionally no backend in v1. Scores, leaderboards, and feedback pers
 ## Project Structure
 
 ```
-product-demo-template/
+product-itura/
 ├── app/
 │   ├── src/
 │   │   ├── routes/

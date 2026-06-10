@@ -34,7 +34,7 @@
 					<p class="description">{pack.description}</p>
 					<div class="meta">
 						<span>{pack.questions.length} questions</span>
-						<span class="play">Play -></span>
+						<span class="play">Play</span>
 					</div>
 				</a>
 			{/each}

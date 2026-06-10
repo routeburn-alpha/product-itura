@@ -264,7 +264,7 @@ Things in the codebase that are no longer pulling their weight, or are actively 
 
 ### X-1. Nav "View on GitHub" points at the wrong repo
 
-`+layout.svelte:14` links to `https://github.com/routeburn-alpha/product-demo-template`. The repo this app actually lives in is `routeburn-alpha/product-demo` (confirmed in `.git/config` and in `ARCHITECTURE.md`'s project structure block). The link 404s for anyone who clicks it.
+`+layout.svelte:14` linked to `https://github.com/routeburn-alpha/product-demo-template`. The repo this app actually lives in is `routeburn-alpha/product-itura` (confirmed in `.git/config`). The stale template link 404s for anyone who clicks it.
 
 ### X-2. Duplicate font-family declarations
 

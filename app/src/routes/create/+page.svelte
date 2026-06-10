@@ -1834,7 +1834,6 @@
 						>
 							<div class="managed-question-order">
 								<span>{index + 1}</span>
-								<span class="drag-handle" aria-hidden="true">::</span>
 							</div>
 
 							<div class="managed-question-body">
@@ -2914,14 +2913,6 @@
 		height: 2rem;
 		border-radius: 999px;
 		background: #effcf8;
-	}
-
-	.drag-handle {
-		color: #777;
-		cursor: grab;
-		font-size: 1rem;
-		letter-spacing: 0;
-		line-height: 1;
 	}
 
 	.managed-question-body,

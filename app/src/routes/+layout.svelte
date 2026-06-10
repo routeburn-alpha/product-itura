@@ -15,7 +15,7 @@
 		<div class="nav-links">
 			<a href="{base}/">Packs</a>
 			<a href="{base}/create">Create quiz</a>
-			<a href="https://github.com/routeburn-alpha/product-demo-template" rel="noopener" target="_blank">
+			<a href="https://github.com/routeburn-alpha/product-itura" rel="noopener" target="_blank">
 				GitHub
 			</a>
 		</div>

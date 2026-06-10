@@ -154,7 +154,6 @@ which is the largest duplication in the current component inventory.
 | Management feedback | Creator `.management-feedback`, `.error` | Success/neutral, error | Shows save/publish/copy messages | Error state currently uses an off-palette danger tone. |
 | Share status pill | Creator `.share-heading > span`, `.ready` | Not ready, ready | Shows link readiness | Neutral default, green ready state. |
 | Managed question item | Creator `.managed-question-list li` | Default, dragging, drag-over | Reorder, edit, move, delete saved questions | Drag-over has focus-like ring; dragging lowers opacity. |
-| Drag handle | Creator `.drag-handle` | Decorative | Visual affordance for draggable rows | `aria-hidden`; actual row is draggable. |
 | Question type placeholders | Creator `.question-types span` | Static locked-builder hints | Shows supported question types before setup is complete | Dashed outline chips. |
 
 Inventory note: creator-specific components are the densest part of the UI and
