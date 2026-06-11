@@ -26,10 +26,17 @@
 	const draftKey = 'quiz-lab-setup-draft';
 	const minMultipleChoiceOptions = 2;
 	const maxMultipleChoiceOptions = 6;
+	const workflowSteps = [
+		{ id: 'setup', label: 'Setup', description: 'Quiz details' },
+		{ id: 'questions', label: 'Questions', description: 'Build the set' },
+		{ id: 'review', label: 'Review', description: 'Publish and share' }
+	] as const;
 
 	type Difficulty = (typeof difficulties)[number];
 	type TimeMode = (typeof timeModes)[number]['value'];
 	type QuestionType = (typeof questionTypes)[number]['value'];
+	type WorkflowStep = (typeof workflowSteps)[number]['id'];
+	type WorkflowStepState = 'current' | 'complete' | 'available' | 'locked';
 
 	type QuizDraft = {
 		title: string;
@@ -133,6 +140,7 @@
 	let managementFeedbackTone = $state<FeedbackTone>('neutral');
 	let attemptedSubmit = $state(false);
 	let attemptedQuestionSave = $state(false);
+	let activeWorkflowStep = $state<WorkflowStep>('setup');
 	let draftReady = $state(false);
 	let builderReady = $state(false);
 	let saveState = $state<'idle' | 'loaded' | 'saved'>('idle');
@@ -927,6 +935,7 @@
 
 		draft.title = draft.title.trim();
 		builderReady = true;
+		activeWorkflowStep = 'questions';
 
 		if (browser) {
 			setTimeout(() => promptEditor?.focus(), 0);
@@ -934,7 +943,74 @@
 	}
 
 	function editSetup() {
-		builderReady = false;
+		activeWorkflowStep = 'setup';
+	}
+
+	function canVisitWorkflowStep(step: WorkflowStep) {
+		if (step === 'setup') return true;
+		if (step === 'questions') return isValid || builderReady || savedQuestions.length > 0;
+
+		return builderReady || savedQuestions.length > 0;
+	}
+
+	function getWorkflowStepState(step: WorkflowStep): WorkflowStepState {
+		if (step === activeWorkflowStep) return 'current';
+		if (step === 'setup') return builderReady ? 'complete' : 'available';
+		if (step === 'questions') {
+			if (savedQuestions.length > 0) return 'complete';
+			return canVisitWorkflowStep(step) ? 'available' : 'locked';
+		}
+		if (quizStatus === 'published') return 'complete';
+
+		return canVisitWorkflowStep(step) ? 'available' : 'locked';
+	}
+
+	function getWorkflowStepStatusLabel(step: WorkflowStep) {
+		const state = getWorkflowStepState(step);
+		if (state === 'current') return 'Current';
+		if (state === 'complete') return 'Done';
+		if (state === 'locked') return 'Locked';
+
+		return 'Open';
+	}
+
+	function getWorkflowStepDetail(step: WorkflowStep) {
+		if (step === 'setup') {
+			if (!isValid) return 'Title needed';
+			return builderReady ? 'Basics saved' : 'Ready to start';
+		}
+
+		if (step === 'questions') {
+			if (savedQuestions.length > 0) return savedQuestionCountLabel;
+			return builderReady ? 'Add questions' : 'Setup first';
+		}
+
+		if (quizStatus === 'published') return 'Published';
+		if (savedQuestions.length > 0) return 'Ready to review';
+
+		return 'No questions yet';
+	}
+
+	function goToWorkflowStep(step: WorkflowStep) {
+		if (step === 'setup') {
+			activeWorkflowStep = 'setup';
+			return;
+		}
+
+		attemptedSubmit = true;
+		if (!isValid) {
+			activeWorkflowStep = 'setup';
+			return;
+		}
+
+		if (!canVisitWorkflowStep(step)) return;
+
+		builderReady = true;
+		activeWorkflowStep = step;
+
+		if (step === 'questions' && browser) {
+			setTimeout(() => promptEditor?.focus(), 0);
+		}
 	}
 
 	function resetDraft() {
@@ -951,6 +1027,7 @@
 		managementFeedbackTone = 'neutral';
 		attemptedSubmit = false;
 		attemptedQuestionSave = false;
+		activeWorkflowStep = 'setup';
 		builderReady = false;
 	}
 
@@ -1069,6 +1146,7 @@
 		questionDraft = serializeQuestionDraft(question);
 		editingQuestionId = questionId;
 		builderReady = true;
+		activeWorkflowStep = 'questions';
 		attemptedQuestionSave = false;
 		setManagementFeedback(`Editing question ${getQuestionPosition(questionId)}.`, 'neutral');
 
@@ -1210,7 +1288,33 @@
 		</div>
 	</header>
 
-	<main class="workspace">
+	<main class="workspace" aria-label="Quiz creation workflow">
+		<nav class="workflow-nav" aria-label="Create quiz steps">
+			{#each workflowSteps as step, index}
+				{@const stepState = getWorkflowStepState(step.id)}
+				<button
+					type="button"
+					class="workflow-step"
+					class:current={stepState === 'current'}
+					class:complete={stepState === 'complete'}
+					class:locked={stepState === 'locked'}
+					disabled={!canVisitWorkflowStep(step.id)}
+					aria-current={activeWorkflowStep === step.id ? 'step' : undefined}
+					onclick={() => goToWorkflowStep(step.id)}
+				>
+					<span class="workflow-step-number">{index + 1}</span>
+					<span class="workflow-step-copy">
+						<strong>{step.label}</strong>
+						<small>{step.description}</small>
+						<small class="workflow-step-detail">{getWorkflowStepDetail(step.id)}</small>
+					</span>
+					<span class="workflow-step-status">{getWorkflowStepStatusLabel(step.id)}</span>
+				</button>
+			{/each}
+		</nav>
+
+		<div class="workflow-stage">
+			{#if activeWorkflowStep === 'setup'}
 		<section class="setup-panel" aria-labelledby="setup-title">
 			<div class="panel-heading">
 				<div>
@@ -1334,6 +1438,7 @@
 			</form>
 		</section>
 
+			{:else if activeWorkflowStep === 'questions'}
 		<section class="builder-panel" class:ready={builderReady} aria-live="polite">
 			<div class="panel-heading">
 				<div>
@@ -1341,7 +1446,17 @@
 					<h2>Question builder</h2>
 				</div>
 				{#if builderReady}
-					<button type="button" class="text-button" onclick={editSetup}>Pause</button>
+					<div class="panel-actions">
+						<button type="button" class="text-button" onclick={editSetup}>Edit setup</button>
+						<button
+							type="button"
+							class="secondary-button"
+							disabled={savedQuestions.length === 0}
+							onclick={() => goToWorkflowStep('review')}
+						>
+							Review quiz
+						</button>
+					</div>
 				{/if}
 			</div>
 
@@ -1590,13 +1705,19 @@
 			{/if}
 		</section>
 
+			{:else}
 		<section class="management-panel" aria-labelledby="management-title">
 			<div class="panel-heading">
 				<div>
 					<p class="step-label">Step 3</p>
-					<h2 id="management-title">Quiz management</h2>
+					<h2 id="management-title">Review, publish, and share</h2>
 				</div>
-				<span class="status-pill" class:published={quizStatus === 'published'}>{quizStatusLabel}</span>
+				<div class="panel-actions">
+					<button type="button" class="text-button" onclick={() => goToWorkflowStep('questions')}>
+						Back to questions
+					</button>
+					<span class="status-pill" class:published={quizStatus === 'published'}>{quizStatusLabel}</span>
+				</div>
 			</div>
 
 			<div class="management-summary" aria-label="Quiz summary">
@@ -1899,6 +2020,8 @@
 				</div>
 			{/if}
 		</section>
+			{/if}
+		</div>
 	</main>
 </div>
 
@@ -1912,6 +2035,7 @@
 
 	.page-header,
 	.panel-heading,
+	.panel-actions,
 	.form-actions,
 	.header-actions,
 	.answer-heading,
@@ -1995,10 +2119,116 @@
 
 	.workspace {
 		display: grid;
-		grid-template-columns: minmax(320px, 0.8fr) minmax(420px, 1.2fr);
 		gap: var(--space-4);
 		align-items: start;
 		margin-bottom: 2.5rem;
+	}
+
+	.workflow-nav {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-3);
+	}
+
+	.workflow-step {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: var(--space-3);
+		align-items: center;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		color: var(--color-text);
+		padding: var(--space-3);
+		text-align: left;
+		font: inherit;
+		cursor: pointer;
+		box-shadow: var(--shadow-card);
+		transition:
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
+	}
+
+	.workflow-step:hover:not(:disabled),
+	.workflow-step.current {
+		border-color: var(--color-green);
+	}
+
+	.workflow-step.current {
+		box-shadow: var(--shadow-focus);
+	}
+
+	.workflow-step.complete {
+		border-color: var(--color-green-border);
+		background: var(--color-green-soft);
+	}
+
+	.workflow-step:disabled {
+		cursor: not-allowed;
+		opacity: 0.62;
+		box-shadow: none;
+	}
+
+	.workflow-step-number,
+	.workflow-step-status {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		border-radius: var(--radius-pill);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-bold);
+	}
+
+	.workflow-step-number {
+		width: 2rem;
+		height: 2rem;
+		background: var(--color-surface-subtle);
+		color: var(--color-text-muted);
+	}
+
+	.workflow-step.current .workflow-step-number,
+	.workflow-step.complete .workflow-step-number {
+		background: var(--color-green);
+		color: var(--color-text-inverse);
+	}
+
+	.workflow-step-copy {
+		display: grid;
+		gap: 0.15rem;
+		min-width: 0;
+	}
+
+	.workflow-step-copy strong {
+		line-height: 1.25;
+		overflow-wrap: anywhere;
+	}
+
+	.workflow-step-copy small {
+		color: var(--color-text-muted);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-semibold);
+		line-height: 1.25;
+	}
+
+	.workflow-step-detail {
+		color: var(--color-text);
+	}
+
+	.workflow-step-status {
+		border: var(--border-width) solid var(--color-border);
+		background: var(--color-surface-subtle);
+		color: var(--color-text-muted);
+		padding: 0.35rem 0.55rem;
+	}
+
+	.workflow-step.current .workflow-step-status,
+	.workflow-step.complete .workflow-step-status {
+		border-color: var(--color-green-border);
+		background: var(--color-surface);
+		color: var(--color-green);
 	}
 
 	.setup-panel,
@@ -2022,9 +2252,13 @@
 	}
 
 	.management-panel {
-		grid-column: 1 / -1;
 		display: grid;
 		gap: var(--space-4);
+	}
+
+	.panel-actions {
+		flex-wrap: wrap;
+		justify-content: flex-end;
 	}
 
 	.text-button,
@@ -2241,6 +2475,7 @@
 	.primary-button,
 	.secondary-button,
 	.danger-button {
+		box-sizing: border-box;
 		border: 1px solid transparent;
 		padding: 0.7rem 1rem;
 		text-decoration: none;
@@ -3079,6 +3314,7 @@
 
 		.page-header,
 		.workspace,
+		.workflow-nav,
 		.field-grid,
 		.time-controls,
 		.builder-meta,
@@ -3104,6 +3340,7 @@
 	@media (max-width: 560px) {
 		.page-header,
 		.panel-heading,
+		.panel-actions,
 		.form-actions,
 		.header-actions,
 		.management-toolbar,
@@ -3121,6 +3358,16 @@
 
 		.form-actions {
 			gap: 0.65rem;
+		}
+
+		.workflow-step {
+			grid-template-columns: auto minmax(0, 1fr);
+			align-items: start;
+		}
+
+		.workflow-step-status {
+			grid-column: 2;
+			width: fit-content;
 		}
 
 		.share-link-row {
