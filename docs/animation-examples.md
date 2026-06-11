@@ -189,9 +189,9 @@ view.
 | State | Visual example | Accessibility check |
 | --- | --- | --- |
 | Loading | Slim green progress bar and three neutral skeleton lines. | Progress wrapper has `role="status"` and status copy. |
-| Entering | New route view fades in with a small vertical offset. | Content remains readable and does not shift surrounding layout. |
+| Content swap | New route content renders without a page-level transition. | Content remains readable and does not shift surrounding layout. |
 | Settled | Progress and skeleton are removed. | Route shell has `aria-busy="false"`. |
-| Reduced motion | Progress and skeleton do not shimmer; route transform is removed. | Status copy remains available. |
+| Reduced motion | Progress and skeleton do not shimmer. | Status copy remains available. |
 
 Example markup:
 
@@ -212,10 +212,6 @@ Example markup:
 Example CSS:
 
 ```css
-.route-view {
-	animation: route-view-in var(--motion-duration-entry) var(--motion-ease-standard) both;
-}
-
 .route-progress span[aria-hidden='true'] {
 	background: var(--color-green);
 	animation: route-progress var(--motion-duration-loading) var(--motion-ease-emphasized) infinite;
@@ -247,6 +243,21 @@ Example CSS:
   copy.
 - Stay within the black, green, and white palette documented in
   `docs/design-system.md`.
+
+## Reduced-motion story
+
+Use this story to test the app with `prefers-reduced-motion: reduce` enabled.
+The expected result is not a separate visual design; it is the same UI with
+motion removed or reduced to static state changes.
+
+| Surface | Default motion | Reduced-motion behavior |
+| --- | --- | --- |
+| Route loading | Progress animates and skeleton shimmers while route content swaps without a page transition. | Progress animation and shimmer are removed. |
+| Appearance popover | Opacity and scale transition. | Opacity transition only; scale transform is removed. |
+| Creator validation | Invalid surfaces, messages, and icons animate in. | Validation state appears immediately with the same copy and icons. |
+| Quiz player | Question card enters with opacity/translate and progress width transitions. | Question card appears statically and progress width snaps to the new value. |
+| Landing hero word | Rotating word stack translates vertically. | First word is static; alternate words are hidden. |
+| Creator preview scroll | Preview start scrolls smoothly to the preview panel. | Preview start uses automatic scrolling. |
 
 ## Storybook migration notes
 

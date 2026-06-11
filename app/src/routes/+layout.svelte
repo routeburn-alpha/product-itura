@@ -311,7 +311,7 @@
 
 <div class="route-shell" aria-busy={routeLoading}>
 	{#key routeKey}
-		<div class="route-view">
+		<div>
 			{@render children()}
 		</div>
 	{/key}
@@ -393,6 +393,22 @@
 		font-family: var(--font-sans);
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		:global(:root) {
+			--motion-duration-hover: 1ms !important;
+			--motion-duration-focus: 1ms !important;
+			--motion-duration-feedback: 1ms !important;
+			--motion-duration-progress: 1ms !important;
+			--motion-duration-entry: 1ms !important;
+			--motion-duration-exit: 1ms !important;
+			--motion-duration-loading: 1ms !important;
+		}
+
+		:global(html:focus-within) {
+			scroll-behavior: auto;
+		}
+	}
+
 	.visually-hidden {
 		position: absolute;
 		width: 1px;
@@ -434,11 +450,6 @@
 
 	.route-shell {
 		position: relative;
-	}
-
-	.route-view {
-		animation: route-view-in var(--motion-duration-entry) var(--motion-ease-standard) both;
-		will-change: opacity, transform;
 	}
 
 	.route-progress {
@@ -580,18 +591,6 @@
 		visibility: visible;
 	}
 
-	@keyframes route-view-in {
-		from {
-			opacity: 0;
-			transform: translateY(0.25rem);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
 	@keyframes route-progress {
 		from {
 			transform: translateX(-110%);
@@ -613,11 +612,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.route-view {
-			animation: none;
-			will-change: auto;
-		}
-
 		.route-progress span[aria-hidden='true'],
 		.route-skeleton span {
 			animation: none;

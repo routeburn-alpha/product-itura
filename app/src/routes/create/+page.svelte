@@ -115,6 +115,12 @@
 		questions: SharedQuestion[];
 	};
 
+	function getMotionSafeScrollBehavior(): ScrollBehavior {
+		if (!browser || typeof window.matchMedia !== 'function') return 'smooth';
+
+		return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+	}
+
 	let draft = $state<QuizDraft>(createDefaultDraft());
 	let questionDraft = $state<QuestionDraft>(createQuestionDraft());
 	let savedQuestions = $state<SavedQuestion[]>([]);
@@ -674,7 +680,10 @@
 		setManagementFeedback('Preview started.', 'neutral');
 
 		if (browser) {
-			setTimeout(() => previewPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+			setTimeout(
+				() => previewPanel?.scrollIntoView({ behavior: getMotionSafeScrollBehavior(), block: 'start' }),
+				0
+			);
 		}
 	}
 
