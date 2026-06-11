@@ -422,7 +422,15 @@ high contrast, and stable.
 - Progress fill uses `--color-green`.
 - Timer normal state uses the positive pill pattern.
 - Timer warning state uses critical tokens and still displays the remaining time.
-- Progress tracks are visual only where equivalent text is already present.
+- Progress tracks are visual only where equivalent text or status copy is already
+  present.
+- Page navigation uses the shared layout route transition: keyed content fades in
+  with `--motion-duration-entry`, a slim `role="status"` progress bar announces
+  loading, and a compact skeleton band gives orientation while the next view
+  settles.
+- Skeleton loading surfaces use neutral surface tokens and
+  `--motion-duration-loading`; they must not introduce new accent colors or
+  layout shift.
 
 Do:
 
@@ -433,6 +441,7 @@ Do not:
 
 - Use warm colors for warning states.
 - Animate width in a way that creates layout shift.
+- Replace real content with long-lived skeletons after data has rendered.
 
 Rationale: progress is orientation, not decoration. It should be calm and
 predictable.
