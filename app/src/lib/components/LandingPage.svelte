@@ -257,10 +257,10 @@
 		font-weight: var(--font-weight-semibold);
 		text-decoration: none;
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.primary-action {
@@ -415,9 +415,9 @@
 		color: inherit;
 		text-decoration: none;
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.preview-pack:hover {
