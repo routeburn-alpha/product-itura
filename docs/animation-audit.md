@@ -23,7 +23,7 @@ follow-up work without changing runtime behavior.
 
 | Area | Current state | Gap |
 | --- | --- | --- |
-| Global tokens | `--motion-fast: 120ms`, `--motion-medium: 180ms`, `--motion-ease: ease` exist in `:root` and every theme token map. | No slow duration, no semantic aliases for hover, entry, exit, progress, or feedback. Current durations do not yet match the requested 150ms, 250ms, and 400ms scale. |
+| Global tokens | `--motion-fast: 150ms`, `--motion-medium: 250ms`, `--motion-slow: 400ms`, easing aliases, and semantic duration tokens exist in `:root` and every theme token map. | Route-local CSS still needs to migrate from compatibility aliases to semantic hover, focus, progress, entry, exit, feedback, and loading tokens. |
 | Focus | A global `:focus-visible` selector applies `--shadow-focus` to anchors, buttons, summary, form controls, and textbox roles. | Focus ring appearance is centralized, but focus transitions are not. Some local controls transition border and color; others snap directly. |
 | Reduced motion | No runtime `prefers-reduced-motion` rule is present in current app CSS. | Existing transform and keyframe motion is not reduced for users who request reduced motion. |
 | State animation policy | Transitions are local and mostly use the global tokens. | The app has no written rule for which properties may animate, which states should snap, and which states require motion opt-outs. |

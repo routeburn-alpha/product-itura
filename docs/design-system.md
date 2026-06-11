@@ -102,7 +102,28 @@ rather than extra tracking.
 | Pill radius | `--radius-pill` | Chips and counters. |
 | Border width | `--border-width`, `--border-width-strong` | Default and emphasized UI boundaries. |
 | Elevation | `--shadow-card`, `--shadow-hover`, `--shadow-focus` | Panels, card hover, focus-visible. |
-| Motion | `--motion-fast`, `--motion-medium`, `--motion-ease` | Short transitions and question entry. |
+| Motion scale | `--motion-fast`, `--motion-medium`, `--motion-slow` | 150ms, 250ms, and 400ms timing scale. |
+| Motion semantics | `--motion-duration-*`, `--motion-ease-*` | Intent-based hover, focus, feedback, progress, entry, exit, and loading motion. |
+
+### Motion roles
+
+| Role | Token | Use |
+| --- | --- | --- |
+| Fast duration | `--motion-fast` | 150ms hover, focus, and quick state changes. |
+| Medium duration | `--motion-medium` | 250ms progress, entry, and feedback transitions. |
+| Slow duration | `--motion-slow` | 400ms loading or deliberately slower ambient motion. |
+| Standard easing | `--motion-ease-standard` | Ease-out movement and state changes. |
+| Emphasized easing | `--motion-ease-emphasized` | Ease-in-out for longer entry/loading transitions. |
+| Hover duration | `--motion-duration-hover` | Button, link, card, and control hover states. |
+| Focus duration | `--motion-duration-focus` | Focus ring and adjacent border/shadow changes. |
+| Feedback duration | `--motion-duration-feedback` | Validation and answer feedback state changes. |
+| Progress duration | `--motion-duration-progress` | Progress bars and determinate loading indicators. |
+| Entry duration | `--motion-duration-entry` | Question, overlay, and panel entry. |
+| Exit duration | `--motion-duration-exit` | Overlay or transient UI exit. |
+| Loading duration | `--motion-duration-loading` | Skeletons or indeterminate loading affordances. |
+
+`--motion-ease` remains as a compatibility alias for `--motion-ease-standard`
+until older route-local CSS is migrated to semantic tokens.
 
 ## Component specifications
 
@@ -215,10 +236,10 @@ border-radius: var(--radius-md);
 font: inherit;
 font-weight: var(--font-weight-semibold);
 transition:
-	background var(--motion-fast) var(--motion-ease),
-	border-color var(--motion-fast) var(--motion-ease),
-	color var(--motion-fast) var(--motion-ease),
-	box-shadow var(--motion-fast) var(--motion-ease);
+	background var(--motion-duration-hover) var(--motion-ease-standard),
+	border-color var(--motion-duration-hover) var(--motion-ease-standard),
+	color var(--motion-duration-hover) var(--motion-ease-standard),
+	box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 ```
 
 Do:
