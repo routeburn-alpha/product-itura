@@ -1,8 +1,21 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import favicon from '$lib/assets/favicon.svg';
 	import { base } from '$app/paths';
+	import ThemePicker from '$lib/components/ThemePicker.svelte';
+	import { ratingsStore } from '$lib/stores/ratingsStore.js';
+	import { themeStore } from '$lib/stores/themeStore.js';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
+	let appearanceOpen = $state(false);
+
+	if (browser) {
+		themeStore.init();
+		ratingsStore.init();
+	}
+
+	onMount(() => themeStore.watchSystemPreference());
 </script>
 
 <svelte:head>
@@ -15,6 +28,12 @@
 		<div class="nav-links">
 			<a href="{base}/">Packs</a>
 			<a href="{base}/create">Create quiz</a>
+			<details class="theme-menu" bind:open={appearanceOpen}>
+				<summary>Appearance</summary>
+				<div class="theme-popover">
+					<ThemePicker compact />
+				</div>
+			</details>
 			<a href="https://github.com/routeburn-alpha/product-itura" rel="noopener" target="_blank">
 				GitHub
 			</a>
@@ -90,6 +109,7 @@
 
 	:global(a:focus-visible),
 	:global(button:focus-visible),
+	:global(summary:focus-visible),
 	:global(input:focus-visible),
 	:global(textarea:focus-visible),
 	:global(select:focus-visible),
@@ -128,18 +148,43 @@
 		gap: 0.35rem;
 	}
 
-	.nav-links a {
+	.nav-links a,
+	.theme-menu summary {
 		border-radius: var(--radius-md);
 		color: var(--color-text-muted);
+		cursor: pointer;
+		display: block;
+		font: inherit;
 		padding: 0.55rem 0.7rem;
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-semibold);
 		text-decoration: none;
 	}
 
-	.nav-links a:hover {
+	.nav-links a:hover,
+	.theme-menu[open] summary,
+	.theme-menu summary:hover {
 		background: var(--color-surface-muted);
 		color: var(--color-green);
+	}
+
+	.theme-menu {
+		position: relative;
+	}
+
+	.theme-menu summary {
+		list-style: none;
+	}
+
+	.theme-menu summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.theme-popover {
+		position: absolute;
+		top: calc(100% + 0.55rem);
+		right: 0;
+		z-index: 20;
 	}
 
 	@media (max-width: 560px) {
@@ -151,12 +196,24 @@
 
 		.nav-links {
 			display: grid;
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 			width: 100%;
 		}
 
-		.nav-links a {
+		.nav-links a,
+		.theme-menu summary {
 			text-align: center;
+		}
+
+		.theme-menu {
+			position: static;
+		}
+
+		.theme-popover {
+			position: fixed;
+			top: 7rem;
+			right: var(--space-4);
+			left: var(--space-4);
 		}
 	}
 </style>
