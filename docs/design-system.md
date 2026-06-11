@@ -271,6 +271,10 @@ prompt editor, checkboxes, radios, and selects.
 - Inputs, textareas, selects, and contenteditable editors use surface, border,
   standard radius, inherited font, and shared focus ring.
 - Invalid controls use `--color-critical-border` and visible error text.
+- Validated controls can use `data-validation-state="idle|success|error"` for
+  smooth border, background, and message transitions.
+- Validation messages use explicit text plus a compact `!` or status icon; do
+  not rely on border color alone.
 - Native checkboxes and radios use `accent-color: var(--color-green)`.
 - Placeholder, helper, and disabled text use `--color-text-muted`.
 
@@ -281,10 +285,17 @@ input[aria-invalid='true'] {
 	border-color: var(--color-critical-border);
 }
 
+input[data-validation-state='success'] {
+	border-color: var(--color-green-border);
+}
+
 .field-error {
+	display: inline-flex;
+	gap: var(--space-2);
 	color: var(--color-critical-text);
 	font-size: var(--font-size-xs);
 	font-weight: var(--font-weight-medium);
+	animation: validation-message-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
 }
 ```
 

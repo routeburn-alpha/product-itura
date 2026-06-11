@@ -1220,6 +1220,7 @@
 						placeholder="Premier League pub quiz"
 						bind:value={draft.title}
 						aria-invalid={attemptedSubmit && !!titleError}
+						data-validation-state={attemptedSubmit ? (titleError ? 'error' : 'success') : 'idle'}
 					/>
 					{#if attemptedSubmit && titleError}
 						<span class="field-error">{titleError}</span>
@@ -1282,6 +1283,7 @@
 									step="1"
 									bind:value={draft.timeLimitSeconds}
 									aria-invalid={attemptedSubmit && !!timeError}
+									data-validation-state={attemptedSubmit ? (timeError ? 'error' : 'success') : 'idle'}
 								/>
 								{#if attemptedSubmit && timeError}
 									<span class="field-error">{timeError}</span>
@@ -1311,7 +1313,8 @@
 					<button type="submit" class="primary-button">
 						{builderReady ? 'Update builder setup' : 'Continue to question builder'}
 					</button>
-					<span class="validation-note">
+					<span class:error={!isValid} class:ready={isValid} class="validation-note">
+						<span class="validation-icon" aria-hidden="true">{isValid ? '✓' : '!'}</span>
 						{#if isValid}
 							Ready for questions
 						{:else}
@@ -1387,6 +1390,7 @@
 								tabindex="0"
 								data-empty={promptText.length === 0}
 								data-placeholder="Ask the question"
+								data-validation-state={attemptedQuestionSave ? (promptText.length < 4 ? 'error' : 'success') : 'idle'}
 								oninput={handlePromptInput}
 								onpaste={handlePromptPaste}
 							></div>
@@ -1429,6 +1433,7 @@
 											placeholder={`Answer ${getOptionLabel(index)}`}
 											bind:value={option.text}
 											aria-invalid={attemptedQuestionSave && !option.text.trim()}
+											data-validation-state={attemptedQuestionSave ? (!option.text.trim() ? 'error' : 'success') : 'idle'}
 										/>
 										{#if questionDraft.options.length > minMultipleChoiceOptions}
 											<button
@@ -1491,6 +1496,7 @@
 								placeholder="photosynthesis"
 								bind:value={questionDraft.blankAnswer}
 								aria-invalid={attemptedQuestionSave && !questionDraft.blankAnswer.trim()}
+								data-validation-state={attemptedQuestionSave ? (!questionDraft.blankAnswer.trim() ? 'error' : 'success') : 'idle'}
 							/>
 							{#if attemptedQuestionSave && !questionDraft.blankAnswer.trim()}
 								<span class="field-error">Add the accepted answer.</span>
@@ -1508,6 +1514,7 @@
 								step="1"
 								bind:value={questionDraft.points}
 								aria-invalid={attemptedQuestionSave && (!Number.isFinite(questionDraft.points) || questionDraft.points < 1 || questionDraft.points > 100)}
+								data-validation-state={attemptedQuestionSave ? (!Number.isFinite(questionDraft.points) || questionDraft.points < 1 || questionDraft.points > 100 ? 'error' : 'success') : 'idle'}
 							/>
 						</label>
 
@@ -2083,6 +2090,7 @@
 		color: var(--color-text);
 		outline: none;
 		transition:
+			background var(--motion-duration-feedback) var(--motion-ease-standard),
 			border-color var(--motion-duration-focus) var(--motion-ease-standard),
 			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
@@ -2105,10 +2113,48 @@
 		border-color: var(--color-critical-text);
 	}
 
+	input[data-validation-state='success'],
+	.editor-surface[data-validation-state='success'] {
+		border-color: var(--color-green-border);
+		box-shadow: 0 0 0 1px var(--color-green-border);
+	}
+
+	input[data-validation-state='error'],
+	.editor-surface[data-validation-state='error'] {
+		border-color: var(--color-critical-border);
+		background: var(--color-critical-bg);
+		animation: validation-surface-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
+	}
+
 	.field-error {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
 		color: var(--color-critical-text);
 		font-size: var(--font-size-xs);
 		font-weight: var(--font-weight-medium);
+		animation: validation-message-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
+	}
+
+	.field-error::before,
+	.error-list li::before,
+	.validation-icon {
+		display: inline-grid;
+		width: 1.1rem;
+		height: 1.1rem;
+		flex: 0 0 auto;
+		place-items: center;
+		border: var(--border-width) solid currentColor;
+		border-radius: var(--radius-pill);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-bold);
+		line-height: 1;
+	}
+
+	.field-error::before,
+	.error-list li::before {
+		content: '!';
+		animation: validation-icon-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
 	}
 
 	.field-grid,
@@ -2229,8 +2275,26 @@
 	}
 
 	.validation-note {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
 		color: var(--color-text-muted);
 		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+		transition: color var(--motion-duration-feedback) var(--motion-ease-standard);
+	}
+
+	.validation-note.ready {
+		color: var(--color-green);
+	}
+
+	.validation-note.error {
+		color: var(--color-critical-text);
+	}
+
+	.validation-note.ready .validation-icon,
+	.validation-note.error .validation-icon {
+		animation: validation-icon-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
 	}
 
 	.editing-banner {
@@ -2382,11 +2446,21 @@
 	}
 
 	.error-list {
+		display: grid;
+		gap: 0.45rem;
+		list-style: none;
 		margin: 0;
-		padding-left: 1.2rem;
+		padding: 0;
 		color: var(--color-critical-text);
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-medium);
+	}
+
+	.error-list li {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-2);
+		animation: validation-message-in var(--motion-duration-feedback) var(--motion-ease-standard) both;
 	}
 
 	.builder-submit {
@@ -3092,6 +3166,51 @@
 			align-items: center;
 			display: flex;
 			justify-content: space-between;
+		}
+	}
+
+	@keyframes validation-message-in {
+		from {
+			opacity: 0;
+			transform: translateY(-0.15rem);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes validation-icon-in {
+		from {
+			transform: scale(0.84);
+		}
+
+		to {
+			transform: scale(1);
+		}
+	}
+
+	@keyframes validation-surface-in {
+		from {
+			box-shadow: 0 0 0 0 rgba(17, 17, 17, 0);
+		}
+
+		to {
+			box-shadow: 0 0 0 1px var(--color-critical-border);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		input[data-validation-state='error'],
+		.editor-surface[data-validation-state='error'],
+		.field-error,
+		.field-error::before,
+		.error-list li,
+		.error-list li::before,
+		.validation-note.ready .validation-icon,
+		.validation-note.error .validation-icon {
+			animation: none;
 		}
 	}
 </style>
