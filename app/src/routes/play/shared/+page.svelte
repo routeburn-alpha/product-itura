@@ -149,11 +149,11 @@
 </script>
 
 {#if pack}
-	<QuizPlayer {pack} backHref={`${base}/`} backLabel="Back to packs" />
+	<QuizPlayer {pack} backHref={`${base}/packs`} backLabel="Back to packs" />
 {:else}
 	<div class="container">
 		<div class="share-card">
-			<a class="back-link" href="{base}/">Back to packs</a>
+			<a class="back-link" href="{base}/packs">Back to packs</a>
 			<p class="eyebrow">Shared quiz</p>
 			<h1>{ready ? 'Link unavailable' : 'Loading quiz'}</h1>
 			<p>{ready ? errorMessage : 'Opening the shared quiz.'}</p>
