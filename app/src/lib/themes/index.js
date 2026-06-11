@@ -1,6 +1,7 @@
 import { darkModeTheme } from './darkMode.js';
 import { defaultTheme } from './default.js';
 import { highContrastTheme } from './highContrast.js';
+import { purpleTheme } from './purple.js';
 
 /**
  * @typedef {Object} Theme
@@ -18,6 +19,7 @@ export const DEFAULT_THEME_ID = defaultTheme.id;
 export const themes = {
 	[defaultTheme.id]: defaultTheme,
 	[darkModeTheme.id]: darkModeTheme,
+	[purpleTheme.id]: purpleTheme,
 	[highContrastTheme.id]: highContrastTheme
 };
 
