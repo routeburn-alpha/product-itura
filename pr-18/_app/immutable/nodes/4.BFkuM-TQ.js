@@ -1,0 +1,1 @@
+import{K as e,M as t,Q as n,Z as r}from"../chunks/BQ6fURpG.js";import"../chunks/D1hYfEew.js";import{t as i}from"../chunks/p5Ee7ETf.js";function a(a,o){n(o,!0);let s=e(()=>o.data.pack);i(a,{get pack(){return t(s)}}),r()}export{a as component};
