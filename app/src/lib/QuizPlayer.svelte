@@ -14,6 +14,7 @@
 		id: string;
 		type: QuestionType;
 		prompt: string;
+		hint: string;
 		options: PlayableOption[];
 		correctOptionId: string;
 		trueFalseAnswer: boolean;
@@ -109,6 +110,7 @@
 			id: typeof value.id === 'string' ? value.id : `question-${fallbackIndex + 1}`,
 			type,
 			prompt: getPromptText(value),
+			hint: typeof value.hint === 'string' ? stripHtml(value.hint) : '',
 			options,
 			correctOptionId,
 			trueFalseAnswer:
@@ -463,6 +465,9 @@
 
 					<h1>{pack.title}</h1>
 					<p class="prompt">{question.prompt}</p>
+					{#if question.hint && !submittedAnswer}
+						<p class="hint">Hint: {question.hint}</p>
+					{/if}
 
 					{#if question.type === 'multiple-choice'}
 						<div class="choice-list">
@@ -788,6 +793,17 @@
 		font-weight: var(--font-weight-bold);
 		line-height: 1.35;
 		overflow-wrap: anywhere;
+	}
+
+	.hint {
+		margin-bottom: 0;
+		border-left: var(--border-width-strong) solid var(--color-green);
+		background: var(--color-green-soft);
+		padding: 0.75rem 0.9rem;
+		color: var(--color-text);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		line-height: 1.45;
 	}
 
 	.choice-list {

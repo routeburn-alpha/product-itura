@@ -1,0 +1,138 @@
+{
+  "id": "beginner-fundamentals",
+  "title": "Beginner Fundamentals",
+  "category": "Beginner / Fundamentals",
+  "description": "Build confidence with essential learning, evidence, and reasoning concepts.",
+  "questions": [
+    {
+      "id": "bf-1",
+      "type": "multiple-choice",
+      "prompt": "Which phrase best describes a learning objective?",
+      "choices": [
+        "A measurable skill or understanding the learner should gain",
+        "A random fact placed at the end of a quiz",
+        "The color used for correct answers",
+        "A list of every possible topic in a subject"
+      ],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Look for the option that describes what the learner can do afterward.",
+      "explanation": "A learning objective names the outcome learners should be able to demonstrate."
+    },
+    {
+      "id": "bf-2",
+      "type": "true-false",
+      "prompt": "Feedback is most useful when it explains why an answer is correct or incorrect.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Think about what helps someone improve on the next attempt.",
+      "explanation": "Feedback should teach the reason behind the answer so the learner can transfer the idea."
+    },
+    {
+      "id": "bf-3",
+      "type": "fill-blank",
+      "prompt": "A repeated arrangement or trend is called a _____.",
+      "blankAnswer": "pattern",
+      "difficulty": 1,
+      "points": 1,
+      "hint": "It is what you notice when the same kind of thing happens again and again.",
+      "explanation": "A pattern is a repeated arrangement, behavior, or relationship that can help guide predictions."
+    },
+    {
+      "id": "bf-4",
+      "type": "multiple-choice",
+      "prompt": "Which item is evidence?",
+      "choices": [
+        "A measurement recorded during an experiment",
+        "A guess made before looking at anything",
+        "A preference for one answer style",
+        "A topic someone wants to study later"
+      ],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Evidence is something you can point to in support of a claim.",
+      "explanation": "Evidence is information that supports or challenges a claim, such as a measurement, observation, or source."
+    },
+    {
+      "id": "bf-5",
+      "type": "multiple-choice",
+      "prompt": "What is the best definition of a claim?",
+      "choices": [
+        "A statement that can be supported or challenged",
+        "A timer used during a quiz",
+        "A list of answer choices",
+        "A score shown after a round"
+      ],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "A claim says something that evidence can test.",
+      "explanation": "A claim is a statement that can be evaluated with reasoning and evidence."
+    },
+    {
+      "id": "bf-6",
+      "type": "true-false",
+      "prompt": "A summary should include every tiny detail from the original material.",
+      "trueFalseAnswer": false,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "A good summary is shorter than the original.",
+      "explanation": "A summary captures the main ideas and leaves out details that are not essential."
+    },
+    {
+      "id": "bf-7",
+      "type": "multiple-choice",
+      "prompt": "Which practice best supports long-term memory?",
+      "choices": [
+        "Spacing practice across multiple sessions",
+        "Reading once as quickly as possible",
+        "Avoiding review after the first attempt",
+        "Only studying material that already feels easy"
+      ],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Memory usually improves when review is spread out.",
+      "explanation": "Spaced practice gives the brain repeated chances to retrieve and strengthen the material."
+    },
+    {
+      "id": "bf-8",
+      "type": "fill-blank",
+      "prompt": "Information around a fact or event that helps explain its meaning is called _____.",
+      "blankAnswer": "context",
+      "difficulty": 1,
+      "points": 1,
+      "hint": "It is the surrounding situation.",
+      "explanation": "Context is the surrounding information that helps a fact, quote, or event make sense."
+    },
+    {
+      "id": "bf-9",
+      "type": "multiple-choice",
+      "prompt": "Which question asks about cause and effect?",
+      "choices": [
+        "What happened after the rule changed?",
+        "What color is the chart title?",
+        "How many choices are on the screen?",
+        "Which word appears first alphabetically?"
+      ],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Cause and effect links an action or condition to a result.",
+      "explanation": "Asking what happened after a change looks for a relationship between a cause and an effect."
+    },
+    {
+      "id": "bf-10",
+      "type": "true-false",
+      "prompt": "A conclusion should connect back to the evidence used in the explanation.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "A conclusion is strongest when the reader can see where it came from.",
+      "explanation": "A conclusion is more convincing when it follows from the evidence and reasoning already presented."
+    }
+  ]
+}
