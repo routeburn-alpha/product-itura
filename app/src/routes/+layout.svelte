@@ -1,16 +1,25 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import favicon from '$lib/assets/favicon.svg';
 	import { base } from '$app/paths';
+	import { page } from '$app/state';
 	import ThemePicker from '$lib/components/ThemePicker.svelte';
 	import { ratingsStore } from '$lib/stores/ratingsStore.js';
 	import { themeStore } from '$lib/stores/themeStore.js';
 	import { onMount } from 'svelte';
 
+	const MIN_ROUTE_LOADING_MS = 320;
+
 	let { children } = $props();
 	let appearanceOpen = $state(false);
 	let appearanceButton = $state<HTMLButtonElement | null>(null);
 	let appearancePopover = $state<HTMLDivElement | null>(null);
+	let routeLoading = $state(false);
+	let routeLoadingStartedAt = 0;
+	let routeLoadingTimer: ReturnType<typeof setTimeout> | undefined;
+
+	const routeKey = $derived(page.url.pathname);
 
 	if (browser) {
 		themeStore.init();
@@ -28,6 +37,47 @@
 			appearanceButton?.focus();
 		}
 	}
+
+	function clearRouteLoadingTimer() {
+		if (!routeLoadingTimer) return;
+
+		clearTimeout(routeLoadingTimer);
+		routeLoadingTimer = undefined;
+	}
+
+	function startRouteLoading() {
+		clearRouteLoadingTimer();
+		routeLoadingStartedAt = Date.now();
+		routeLoading = true;
+	}
+
+	function finishRouteLoading() {
+		if (!routeLoading) return;
+
+		const elapsed = Date.now() - routeLoadingStartedAt;
+		const remaining = MIN_ROUTE_LOADING_MS - elapsed;
+
+		if (remaining <= 0) {
+			routeLoading = false;
+			return;
+		}
+
+		routeLoadingTimer = setTimeout(() => {
+			routeLoading = false;
+			routeLoadingTimer = undefined;
+		}, remaining);
+	}
+
+	beforeNavigate((navigation) => {
+		if (navigation.type === 'leave' || !navigation.to?.url) return;
+		if (navigation.to.url.pathname === page.url.pathname) return;
+
+		startRouteLoading();
+	});
+
+	afterNavigate(() => {
+		finishRouteLoading();
+	});
 
 	onMount(() => {
 		const stopThemePreferenceWatch = themeStore.watchSystemPreference();
@@ -53,6 +103,7 @@
 		document.addEventListener('keydown', handleDocumentKeydown);
 
 		return () => {
+			clearRouteLoadingTimer();
 			stopThemePreferenceWatch();
 			document.removeEventListener('pointerdown', handleDocumentPointerDown);
 			document.removeEventListener('keydown', handleDocumentKeydown);
@@ -101,7 +152,25 @@
 	</nav>
 </header>
 
-{@render children()}
+{#if routeLoading}
+	<div class="route-progress" role="status" aria-live="polite">
+		<span class="visually-hidden">Loading next page</span>
+		<span aria-hidden="true"></span>
+	</div>
+	<div class="route-skeleton" aria-hidden="true">
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
+{/if}
+
+<div class="route-shell" aria-busy={routeLoading}>
+	{#key routeKey}
+		<div class="route-view">
+			{@render children()}
+		</div>
+	{/key}
+</div>
 
 <style>
 	:global(:root) {
@@ -179,6 +248,16 @@
 		font-family: var(--font-sans);
 	}
 
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
 	:global(a),
 	:global(button),
 	:global(summary),
@@ -207,6 +286,67 @@
 	.site-header {
 		border-bottom: var(--border-width) solid var(--color-border);
 		background: var(--color-surface);
+	}
+
+	.route-shell {
+		position: relative;
+	}
+
+	.route-view {
+		animation: route-view-in var(--motion-duration-entry) var(--motion-ease-standard) both;
+		will-change: opacity, transform;
+	}
+
+	.route-progress {
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		height: 0.2rem;
+		overflow: hidden;
+		background: var(--color-surface-subtle);
+	}
+
+	.route-progress span[aria-hidden='true'] {
+		display: block;
+		width: 42%;
+		height: 100%;
+		background: var(--color-green);
+		animation: route-progress var(--motion-duration-loading) var(--motion-ease-emphasized) infinite;
+	}
+
+	.route-skeleton {
+		display: grid;
+		gap: var(--space-3);
+		max-width: var(--content-default);
+		margin: var(--space-4) auto 0;
+		padding: 0 var(--space-8);
+	}
+
+	.route-skeleton span {
+		display: block;
+		height: 0.85rem;
+		border-radius: var(--radius-pill);
+		background:
+			linear-gradient(
+				90deg,
+				var(--color-surface-subtle) 0%,
+				var(--color-surface-muted) 48%,
+				var(--color-surface-subtle) 100%
+			);
+		background-size: 220% 100%;
+		animation: route-skeleton-shimmer var(--motion-duration-loading) var(--motion-ease-emphasized) infinite;
+	}
+
+	.route-skeleton span:nth-child(1) {
+		width: min(22rem, 65%);
+	}
+
+	.route-skeleton span:nth-child(2) {
+		width: min(34rem, 88%);
+	}
+
+	.route-skeleton span:nth-child(3) {
+		width: min(18rem, 52%);
 	}
 
 	.top-nav {
@@ -288,7 +428,49 @@
 		visibility: visible;
 	}
 
+	@keyframes route-view-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.25rem);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes route-progress {
+		from {
+			transform: translateX(-110%);
+		}
+
+		to {
+			transform: translateX(240%);
+		}
+	}
+
+	@keyframes route-skeleton-shimmer {
+		from {
+			background-position: 180% 0;
+		}
+
+		to {
+			background-position: -80% 0;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
+		.route-view {
+			animation: none;
+			will-change: auto;
+		}
+
+		.route-progress span[aria-hidden='true'],
+		.route-skeleton span {
+			animation: none;
+		}
+
 		.theme-popover,
 		.theme-popover.open {
 			transform: none;
@@ -326,6 +508,10 @@
 			right: var(--space-4);
 			left: var(--space-4);
 			transform-origin: top center;
+		}
+
+		.route-skeleton {
+			padding: 0 var(--space-5);
 		}
 	}
 </style>
