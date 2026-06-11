@@ -11,7 +11,7 @@ follow-up work without changing runtime behavior.
 
 | Source | Surface | Motion relevance |
 | --- | --- | --- |
-| `app/src/routes/+layout.svelte` | App shell, primary nav, appearance picker popover | Global motion tokens, focus ring, nav hover, native `details` popover. |
+| `app/src/routes/+layout.svelte` | App shell, primary nav, appearance picker popover | Global motion tokens, focus ring, nav hover, controlled appearance overlay. |
 | `app/src/routes/+page.svelte` | Pack picker | Pack card hover lift and shadow. |
 | `app/src/lib/QuizPlayer.svelte` | Runtime quiz player | Progress width transition, question entry animation, answer choice states, CTA hover. |
 | `app/src/routes/create/+page.svelte` | Quiz creator | Dense form, segmented controls, rich editor, preview player, drag reorder list. |
@@ -32,7 +32,7 @@ follow-up work without changing runtime behavior.
 
 | Component family | Existing motion | Opportunity |
 | --- | --- | --- |
-| Primary navigation | Nav and appearance summary hover states change background and text color instantly. Appearance popover appears through native `details` with no entry or exit treatment. | Add tokenized color transitions to nav and summary. Consider a small opacity or translate entry for the popover only after reduced-motion support exists. |
+| Primary navigation | Nav and appearance trigger hover states use tokenized color/background transitions. Appearance popover uses opacity/scale entry and exit transitions with a reduced-motion opacity-only fallback. | Keep the overlay pattern non-modal until the app has a true dialog use case. |
 | Pack cards | Pack card hover transitions border, shadow, and `translateY(-2px)`. | Keep the lift subtle, but gate transform with reduced-motion. Use the same hover duration/easing as other interactive surfaces. |
 | Primary and secondary actions | Player and creator buttons transition background, border, color, and sometimes `translateY(-1px)`. Disabled states mostly snap. | Standardize button transitions across player and creator. Gate hover transforms. Add disabled-state opacity/color transition only if it remains clear and non-distracting. |
 | Text, remove, danger, toolbar, and segmented buttons | Creator control classes share a broad transition block. Rich-toolbar and segmented buttons rely on the same timing. | Split semantic motion by role: hover/focus for small controls, selected state for segmented buttons, destructive hover with no extra movement. |
@@ -58,9 +58,9 @@ follow-up work without changing runtime behavior.
 
 ## Missing Families
 
-- No modal or dialog component exists in the current UI.
+- No modal component exists in the current UI; the appearance picker is a non-modal dialog/popover.
 - No toast system exists; feedback is inline.
-- No custom dropdown system exists besides the appearance `details` popover and native `<select>`.
+- No custom dropdown system exists besides the controlled appearance popover and native `<select>`.
 - No tooltip system exists; rich-toolbar buttons use native `title` attributes.
 - No skeleton or async loading component exists. The shared route has a text loading state before hash data is decoded.
 - No page transition system exists in Svelte route changes.
@@ -73,9 +73,9 @@ follow-up work without changing runtime behavior.
    between `+layout.svelte` and theme token maps.
 2. **Task #36 - hover and focus:** apply the semantic hover/focus tokens to nav,
    links, buttons, segmented controls, theme controls, and answer controls.
-3. **Task #37 - overlays:** start with the appearance `details` popover. There is
-   no modal/dialog system to animate yet, so document that gap before inventing a
-   modal API.
+3. **Task #37 - overlays:** use the appearance popover as the first overlay
+   pattern. There is no modal system to animate yet, so document that gap before
+   inventing a modal API.
 4. **Task #38 - forms:** align creator and player field focus styles, then add
    validation transitions for border, shadow, and message appearance.
 5. **Task #39 - page/loading states:** avoid route-wide animation until reduced

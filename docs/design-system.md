@@ -136,6 +136,10 @@ until older route-local CSS is migrated to semantic tokens.
 - Brand uses primary text and bold weight.
 - Nav links use muted text by default, green on hover/focus, and the shared
   focus-visible ring.
+- The appearance control uses a real button with `aria-expanded` and a
+  non-modal overlay panel. The overlay fades/scales with entry and exit tokens,
+  closes on outside click or Escape, and keeps reduced-motion users on opacity
+  only.
 
 Do:
 
