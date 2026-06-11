@@ -14,6 +14,7 @@
 		packs.reduce((questionCount, pack) => questionCount + pack.questions.length, 0)
 	);
 	const presentedPack = $derived(randomPack ?? packs[0] ?? null);
+	const previewPacks = $derived(packs.slice(0, 2));
 
 	const recentPackStorageKey = 'quiz-lab-recent-random-packs';
 
@@ -145,6 +146,28 @@
 			</div>
 		</div>
 	</section>
+
+	{#if previewPacks.length > 0}
+		<section class="pack-strip" aria-labelledby="landing-packs-title">
+			<div class="strip-heading">
+				<div>
+					<p class="eyebrow">Published packs</p>
+					<h2 id="landing-packs-title">Choose a focused round</h2>
+				</div>
+				<a href="{base}/packs">View all packs</a>
+			</div>
+
+			<div class="preview-grid">
+				{#each previewPacks as pack (pack.id)}
+					<a class="preview-pack" href="{base}/play/{pack.id}">
+						<span>{pack.category}</span>
+						<strong>{pack.title}</strong>
+						<small>{pack.questions.length} questions</small>
+					</a>
+				{/each}
+			</div>
+		</section>
+	{/if}
 </main>
 
 <style>
@@ -160,7 +183,7 @@
 		grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
 		gap: var(--space-6);
 		align-items: stretch;
-		min-height: min(560px, calc(100vh - 5rem));
+		min-height: min(440px, calc(100vh - 9rem));
 	}
 
 	.hero-copy {
@@ -315,6 +338,7 @@
 
 	.summary-grid {
 		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-3);
 	}
 
@@ -329,7 +353,7 @@
 	}
 
 	.summary-grid strong {
-		font-size: var(--font-size-3xl);
+		font-size: var(--font-size-2xl);
 		line-height: 1;
 	}
 
@@ -338,6 +362,80 @@
 		color: var(--color-text-muted);
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-semibold);
+	}
+
+	.pack-strip {
+		border-top: var(--border-width) solid var(--color-border);
+		margin-top: var(--space-6);
+		padding-top: var(--space-6);
+	}
+
+	.strip-heading {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: var(--space-4);
+		margin-bottom: var(--space-4);
+	}
+
+	.strip-heading h2 {
+		margin: 0;
+		font-size: var(--font-size-lg);
+		line-height: 1.2;
+		letter-spacing: 0;
+	}
+
+	.strip-heading a {
+		border-radius: var(--radius-md);
+		color: var(--color-green);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+		padding: 0.45rem 0.55rem;
+		text-decoration: none;
+	}
+
+	.strip-heading a:hover {
+		background: var(--color-surface-muted);
+		color: var(--color-green-hover);
+	}
+
+	.preview-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-4);
+	}
+
+	.preview-pack {
+		display: grid;
+		gap: var(--space-2);
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		padding: var(--space-4);
+		color: inherit;
+		text-decoration: none;
+		transition:
+			background var(--motion-fast) var(--motion-ease),
+			border-color var(--motion-fast) var(--motion-ease),
+			box-shadow var(--motion-fast) var(--motion-ease);
+	}
+
+	.preview-pack:hover {
+		border-color: var(--color-green-border);
+		background: var(--color-surface-muted);
+		box-shadow: var(--shadow-hover);
+	}
+
+	.preview-pack span,
+	.preview-pack small {
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+	}
+
+	.preview-pack strong {
+		font-size: var(--font-size-md);
+		line-height: 1.25;
 	}
 
 	@keyframes word-shift {
@@ -388,6 +486,16 @@
 
 		.subtitle {
 			font-size: var(--font-size-md);
+		}
+
+		.strip-heading {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: var(--space-2);
+		}
+
+		.preview-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
