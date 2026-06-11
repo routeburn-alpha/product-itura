@@ -62,8 +62,20 @@ export const highContrastTheme = {
 		'--shadow-card': '0 0 0 1px #000000',
 		'--shadow-hover': '0 0 0 2px #005c45',
 		'--shadow-focus': '0 0 0 3px var(--color-focus-ring)',
-		'--motion-fast': '120ms',
-		'--motion-medium': '180ms',
-		'--motion-ease': 'ease'
+		'--motion-fast': '150ms',
+		'--motion-medium': '250ms',
+		'--motion-slow': '400ms',
+		'--motion-ease-out': 'ease-out',
+		'--motion-ease-in-out': 'ease-in-out',
+		'--motion-ease': 'var(--motion-ease-out)',
+		'--motion-duration-hover': 'var(--motion-fast)',
+		'--motion-duration-focus': 'var(--motion-fast)',
+		'--motion-duration-feedback': 'var(--motion-medium)',
+		'--motion-duration-progress': 'var(--motion-medium)',
+		'--motion-duration-entry': 'var(--motion-medium)',
+		'--motion-duration-exit': 'var(--motion-fast)',
+		'--motion-duration-loading': 'var(--motion-slow)',
+		'--motion-ease-standard': 'var(--motion-ease-out)',
+		'--motion-ease-emphasized': 'var(--motion-ease-in-out)'
 	}
 };

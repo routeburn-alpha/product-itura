@@ -113,9 +113,21 @@ gap values unless a component has a fixed external constraint.
 | `--shadow-card` | `0 12px 30px rgba(17, 17, 17, 0.06)` | Panels and elevated cards. |
 | `--shadow-hover` | `0 10px 24px rgba(17, 17, 17, 0.08)` | Hovered pack cards. |
 | `--shadow-focus` | `0 0 0 3px var(--color-focus-ring)` | Focus-visible ring. |
-| `--motion-fast` | `120ms` | Color, border, and shadow changes. |
-| `--motion-medium` | `180ms` | Question entry or meaningful transitions. |
-| `--motion-ease` | `ease` | Default easing. |
+| `--motion-fast` | `150ms` | Quick hover, focus, and selected-state changes. |
+| `--motion-medium` | `250ms` | Progress, feedback, and entry transitions. |
+| `--motion-slow` | `400ms` | Loading or deliberately slower ambient motion. |
+| `--motion-ease-out` | `ease-out` | Standard easing for responsive state changes. |
+| `--motion-ease-in-out` | `ease-in-out` | Emphasized easing for longer entry/loading motion. |
+| `--motion-ease` | `var(--motion-ease-out)` | Compatibility alias for existing route-local CSS. |
+| `--motion-duration-hover` | `var(--motion-fast)` | Button, link, card, and control hover states. |
+| `--motion-duration-focus` | `var(--motion-fast)` | Focus ring and adjacent border/shadow changes. |
+| `--motion-duration-feedback` | `var(--motion-medium)` | Validation and answer feedback state changes. |
+| `--motion-duration-progress` | `var(--motion-medium)` | Progress bar width and determinate loading changes. |
+| `--motion-duration-entry` | `var(--motion-medium)` | Question, overlay, and panel entry. |
+| `--motion-duration-exit` | `var(--motion-fast)` | Overlay or transient UI exit. |
+| `--motion-duration-loading` | `var(--motion-slow)` | Skeletons and indeterminate loading affordances. |
+| `--motion-ease-standard` | `var(--motion-ease-out)` | Default semantic easing. |
+| `--motion-ease-emphasized` | `var(--motion-ease-in-out)` | Longer semantic easing. |
 
 Gate transform animations with `@media (prefers-reduced-motion: no-preference)`.
 Color, border, and shadow transitions may remain, but keep them short.
@@ -147,10 +159,10 @@ border-radius: var(--radius-md);
 font: inherit;
 font-weight: var(--font-weight-semibold);
 transition:
-	background var(--motion-fast) var(--motion-ease),
-	border-color var(--motion-fast) var(--motion-ease),
-	color var(--motion-fast) var(--motion-ease),
-	box-shadow var(--motion-fast) var(--motion-ease);
+	background var(--motion-duration-hover) var(--motion-ease-standard),
+	border-color var(--motion-duration-hover) var(--motion-ease-standard),
+	color var(--motion-duration-hover) var(--motion-ease-standard),
+	box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 ```
 
 Disabled buttons should reduce opacity and use `cursor: not-allowed`. Disabled
