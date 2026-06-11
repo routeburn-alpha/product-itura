@@ -41,7 +41,7 @@
 
 	let {
 		pack,
-		backHref = `${base}/`,
+		backHref = `${base}/packs`,
 		backLabel = 'Back to packs'
 	}: { pack: Pack; backHref?: string; backLabel?: string } = $props();
 	const questions = $derived(pack.questions.map(normalizeQuestion));

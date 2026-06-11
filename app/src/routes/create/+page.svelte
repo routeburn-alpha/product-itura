@@ -1196,7 +1196,7 @@
 			<p class="subtitle">Set the basics for a trivia-night quiz, then carry the saved draft into questions.</p>
 		</div>
 		<div class="header-actions">
-			<a class="secondary-button" href="{base}/">All packs</a>
+			<a class="secondary-button" href="{base}/packs">All packs</a>
 			<span class="save-pill" aria-live="polite">{saveLabel}</span>
 		</div>
 	</header>
