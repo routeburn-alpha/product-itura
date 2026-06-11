@@ -12,29 +12,101 @@
 	const MIN_ROUTE_LOADING_MS = 320;
 
 	let { children } = $props();
-	let appearanceOpen = $state(false);
-	let appearanceButton = $state<HTMLButtonElement | null>(null);
-	let appearancePopover = $state<HTMLDivElement | null>(null);
+	let desktopAppearanceOpen = $state(false);
+	let mobileAppearanceOpen = $state(false);
+	let activeAppearanceButton = $state<HTMLButtonElement | null>(null);
+	let desktopAppearancePopover = $state<HTMLDivElement | null>(null);
+	let mobileAppearancePopover = $state<HTMLDivElement | null>(null);
+	let mobileMenu = $state<HTMLDetailsElement | null>(null);
+	let mobileMenuOpen = $state(false);
 	let routeLoading = $state(false);
 	let routeLoadingStartedAt = 0;
 	let routeLoadingTimer: ReturnType<typeof setTimeout> | undefined;
 
+	const appearanceOpen = $derived(desktopAppearanceOpen || mobileAppearanceOpen);
 	const routeKey = $derived(page.url.pathname);
+	const routePath = $derived.by(() => {
+		const pathname = page.url.pathname;
+
+		if (base && pathname.startsWith(base)) {
+			return pathname.slice(base.length) || '/';
+		}
+
+		return pathname || '/';
+	});
+	const breadcrumbs = $derived.by(() => {
+		if (routePath === '/') {
+			return [{ label: 'Quiz Lab' }];
+		}
+
+		if (routePath.startsWith('/packs')) {
+			return [
+				{ label: 'Quiz Lab', href: `${base}/` },
+				{ label: 'Packs' }
+			];
+		}
+
+		if (routePath.startsWith('/create')) {
+			return [
+				{ label: 'Quiz Lab', href: `${base}/` },
+				{ label: 'Create' }
+			];
+		}
+
+		if (routePath.startsWith('/play')) {
+			return [
+				{ label: 'Quiz Lab', href: `${base}/` },
+				{ label: 'Packs', href: `${base}/packs` },
+				{ label: 'Play' }
+			];
+		}
+
+		return [
+			{ label: 'Quiz Lab', href: `${base}/` },
+			{ label: 'Page' }
+		];
+	});
 
 	if (browser) {
 		themeStore.init();
 		ratingsStore.init();
 	}
 
-	function toggleAppearance() {
-		appearanceOpen = !appearanceOpen;
+	function toggleAppearance(menu: 'desktop' | 'mobile', event: MouseEvent) {
+		if (event.currentTarget instanceof HTMLButtonElement) {
+			activeAppearanceButton = event.currentTarget;
+		}
+
+		if (menu === 'desktop') {
+			desktopAppearanceOpen = !desktopAppearanceOpen;
+			mobileAppearanceOpen = false;
+			return;
+		}
+
+		mobileAppearanceOpen = !mobileAppearanceOpen;
+		desktopAppearanceOpen = false;
 	}
 
 	function closeAppearance({ restoreFocus = false } = {}) {
-		appearanceOpen = false;
+		desktopAppearanceOpen = false;
+		mobileAppearanceOpen = false;
 
 		if (restoreFocus) {
-			appearanceButton?.focus();
+			activeAppearanceButton?.focus();
+		}
+	}
+
+	function closeMobileMenu() {
+		mobileMenuOpen = false;
+
+		if (mobileAppearanceOpen) {
+			closeAppearance();
+		}
+	}
+
+	function handleMobileMenuToggle(event: Event) {
+		if (event.currentTarget instanceof HTMLDetailsElement && !event.currentTarget.open) {
+			closeAppearance();
 		}
 	}
 
@@ -83,9 +155,25 @@
 		const stopThemePreferenceWatch = themeStore.watchSystemPreference();
 
 		function handleDocumentPointerDown(event: PointerEvent) {
-			if (!appearanceOpen || !(event.target instanceof Node)) return;
+			if (!(event.target instanceof Node)) return;
 
-			if (appearanceButton?.contains(event.target) || appearancePopover?.contains(event.target)) {
+			if (mobileMenuOpen && !mobileMenu?.contains(event.target)) {
+				closeMobileMenu();
+			}
+
+			if (!appearanceOpen) return;
+
+			if (
+				event.target instanceof Element &&
+				event.target.closest('[data-appearance-trigger]')
+			) {
+				return;
+			}
+
+			if (
+				desktopAppearancePopover?.contains(event.target) ||
+				mobileAppearancePopover?.contains(event.target)
+			) {
 				return;
 			}
 
@@ -118,29 +206,42 @@
 <header class="site-header">
 	<nav class="top-nav" aria-label="Primary">
 		<a class="brand" href="{base}/">Quiz Lab</a>
-		<div class="nav-links">
+		<ol class="mobile-breadcrumb" aria-label="Breadcrumb">
+			{#each breadcrumbs as breadcrumb, index (breadcrumb.label)}
+				<li>
+					{#if breadcrumb.href && index < breadcrumbs.length - 1}
+						<a href={breadcrumb.href}>{breadcrumb.label}</a>
+					{:else}
+						<span aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}>
+							{breadcrumb.label}
+						</span>
+					{/if}
+				</li>
+			{/each}
+		</ol>
+		<div class="nav-links desktop-links">
 			<a href="{base}/packs">Packs</a>
 			<a href="{base}/create">Create quiz</a>
 			<div class="theme-menu">
 				<button
-					bind:this={appearanceButton}
 					type="button"
 					class="theme-trigger"
-					aria-controls="appearance-popover"
-					aria-expanded={appearanceOpen}
-					onclick={toggleAppearance}
+					data-appearance-trigger
+					aria-controls="desktop-appearance-popover"
+					aria-expanded={desktopAppearanceOpen}
+					onclick={(event) => toggleAppearance('desktop', event)}
 				>
 					Appearance
 				</button>
 				<div
-					bind:this={appearancePopover}
-					id="appearance-popover"
+					bind:this={desktopAppearancePopover}
+					id="desktop-appearance-popover"
 					class="theme-popover"
-					class:open={appearanceOpen}
+					class:open={desktopAppearanceOpen}
 					role="dialog"
-					aria-hidden={!appearanceOpen}
+					aria-hidden={!desktopAppearanceOpen}
 					aria-label="Appearance options"
-					inert={!appearanceOpen}
+					inert={!desktopAppearanceOpen}
 				>
 					<ThemePicker compact />
 				</div>
@@ -149,6 +250,50 @@
 				GitHub
 			</a>
 		</div>
+		<details
+			bind:this={mobileMenu}
+			bind:open={mobileMenuOpen}
+			class="mobile-menu"
+			ontoggle={handleMobileMenuToggle}
+		>
+			<summary>Menu</summary>
+			<div class="mobile-menu-panel">
+				<a href="{base}/packs" onclick={closeMobileMenu}>Packs</a>
+				<a href="{base}/create" onclick={closeMobileMenu}>Create quiz</a>
+				<div class="theme-menu">
+					<button
+						type="button"
+						class="theme-trigger"
+						data-appearance-trigger
+						aria-controls="mobile-appearance-popover"
+						aria-expanded={mobileAppearanceOpen}
+						onclick={(event) => toggleAppearance('mobile', event)}
+					>
+						Appearance
+					</button>
+					<div
+						bind:this={mobileAppearancePopover}
+						id="mobile-appearance-popover"
+						class="theme-popover"
+						class:open={mobileAppearanceOpen}
+						role="dialog"
+						aria-hidden={!mobileAppearanceOpen}
+						aria-label="Appearance options"
+						inert={!mobileAppearanceOpen}
+					>
+						<ThemePicker compact />
+					</div>
+				</div>
+				<a
+					href="https://github.com/routeburn-alpha/product-itura"
+					rel="noopener"
+					target="_blank"
+					onclick={closeMobileMenu}
+				>
+					GitHub
+				</a>
+			</div>
+		</details>
 	</nav>
 </header>
 
@@ -284,7 +429,6 @@
 	}
 
 	.site-header {
-		border-bottom: var(--border-width) solid var(--color-border);
 		background: var(--color-surface);
 	}
 
@@ -374,8 +518,14 @@
 		gap: 0.35rem;
 	}
 
+	.mobile-breadcrumb,
+	.mobile-menu {
+		display: none;
+	}
+
 	.nav-links a,
-	.theme-trigger {
+	.theme-trigger,
+	.mobile-menu summary {
 		border: 0;
 		border-radius: var(--radius-md);
 		background: transparent;
@@ -391,7 +541,9 @@
 
 	.nav-links a:hover,
 	.theme-trigger[aria-expanded='true'],
-	.theme-trigger:hover {
+	.theme-trigger:hover,
+	.mobile-menu[open] summary,
+	.mobile-menu summary:hover {
 		background: var(--color-surface-muted);
 		color: var(--color-green);
 	}
@@ -482,32 +634,142 @@
 
 	@media (max-width: 560px) {
 		.top-nav {
-			align-items: flex-start;
-			flex-direction: column;
-			padding: 0.85rem var(--space-5);
-		}
-
-		.nav-links {
 			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			width: 100%;
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: center;
+			gap: var(--space-3);
+			padding: 0.75rem var(--space-4);
 		}
 
-		.nav-links a,
-		.theme-trigger {
-			text-align: center;
+		.brand,
+		.desktop-links {
+			display: none;
+		}
+
+		.mobile-breadcrumb {
+			display: flex;
+			align-items: center;
+			min-width: 0;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		.mobile-breadcrumb li {
+			display: flex;
+			align-items: center;
+			min-width: 0;
+			color: var(--color-text-muted);
+			font-size: var(--font-size-sm);
+			font-weight: var(--font-weight-semibold);
+		}
+
+		.mobile-breadcrumb li + li::before {
+			content: '/';
+			flex: 0 0 auto;
+			margin: 0 var(--space-2);
+			color: var(--color-border-strong);
+		}
+
+		.mobile-breadcrumb a,
+		.mobile-breadcrumb span {
+			display: block;
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.mobile-breadcrumb a {
+			border-radius: var(--radius-sm);
+			color: var(--color-text-muted);
+			padding: 0.2rem 0;
+			text-decoration: none;
+		}
+
+		.mobile-breadcrumb a:hover {
+			color: var(--color-green);
+		}
+
+		.mobile-breadcrumb span[aria-current='page'] {
+			color: var(--color-text);
+		}
+
+		.mobile-menu {
+			position: relative;
+			display: block;
+		}
+
+		.mobile-menu summary {
+			list-style: none;
+			min-height: 2.25rem;
+			padding: 0.45rem 0.65rem;
+		}
+
+		.mobile-menu summary::-webkit-details-marker {
+			display: none;
+		}
+
+		.mobile-menu-panel {
+			position: absolute;
+			top: calc(100% + 0.5rem);
+			right: 0;
+			z-index: 30;
+			display: grid;
+			min-width: 12.5rem;
+			gap: var(--space-1);
+			border: var(--border-width) solid var(--color-border);
+			border-radius: var(--radius-md);
+			background: var(--color-surface);
+			box-shadow: var(--shadow-card);
+			padding: var(--space-2);
+		}
+
+		.mobile-menu:not([open]) .mobile-menu-panel {
+			display: none;
+		}
+
+		.mobile-menu-panel a,
+		.mobile-menu-panel .theme-trigger {
+			width: 100%;
+			box-sizing: border-box;
+			border: 0;
+			border-radius: var(--radius-md);
+			background: transparent;
+			color: var(--color-text-muted);
+			display: block;
+			font: inherit;
+			font-size: var(--font-size-sm);
+			font-weight: var(--font-weight-semibold);
+			padding: 0.55rem 0.7rem;
+			text-align: left;
+			text-decoration: none;
+		}
+
+		.mobile-menu-panel a:hover,
+		.mobile-menu-panel .theme-trigger[aria-expanded='true'],
+		.mobile-menu-panel .theme-trigger:hover {
+			background: var(--color-surface-muted);
+			color: var(--color-green);
 		}
 
 		.theme-menu {
 			position: static;
 		}
 
-		.theme-popover {
-			position: fixed;
-			top: 7rem;
-			right: var(--space-4);
-			left: var(--space-4);
-			transform-origin: top center;
+		.mobile-menu .theme-popover {
+			display: none;
+			position: static;
+			margin-top: var(--space-2);
+			opacity: 1;
+			pointer-events: auto;
+			transform: none;
+			transition: none;
+			visibility: visible;
+		}
+
+		.mobile-menu .theme-popover.open {
+			display: block;
 		}
 
 		.route-skeleton {
