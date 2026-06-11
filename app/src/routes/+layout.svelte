@@ -166,7 +166,7 @@
 
 <div class="route-shell" aria-busy={routeLoading}>
 	{#key routeKey}
-		<div class="route-view">
+		<div>
 			{@render children()}
 		</div>
 	{/key}
@@ -308,11 +308,6 @@
 		position: relative;
 	}
 
-	.route-view {
-		animation: route-view-in var(--motion-duration-entry) var(--motion-ease-standard) both;
-		will-change: opacity, transform;
-	}
-
 	.route-progress {
 		position: sticky;
 		top: 0;
@@ -444,18 +439,6 @@
 		visibility: visible;
 	}
 
-	@keyframes route-view-in {
-		from {
-			opacity: 0;
-			transform: translateY(0.25rem);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
 	@keyframes route-progress {
 		from {
 			transform: translateX(-110%);
@@ -477,11 +460,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.route-view {
-			animation: none;
-			will-change: auto;
-		}
-
 		.route-progress span[aria-hidden='true'],
 		.route-skeleton span {
 			animation: none;

@@ -426,10 +426,9 @@ high contrast, and stable.
 - Timer warning state uses critical tokens and still displays the remaining time.
 - Progress tracks are visual only where equivalent text or status copy is already
   present.
-- Page navigation uses the shared layout route transition: keyed content fades in
-  with `--motion-duration-entry`, a slim `role="status"` progress bar announces
-  loading, and a compact skeleton band gives orientation while the next view
-  settles.
+- Page navigation uses shared layout loading feedback without a page-level
+  content transition: a slim `role="status"` progress bar announces loading, and
+  a compact skeleton band gives orientation while the next view settles.
 - Skeleton loading surfaces use neutral surface tokens and
   `--motion-duration-loading`; they must not introduce new accent colors or
   layout shift.
