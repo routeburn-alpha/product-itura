@@ -1,0 +1,115 @@
+{
+  "id": "science-all-around-us",
+  "title": "Science All Around Us",
+  "category": "Science",
+  "description": "Explore space, biology, chemistry, weather, and everyday physics.",
+  "questions": [
+    {
+      "id": "sau-1",
+      "type": "multiple-choice",
+      "prompt": "What is the chemical symbol for gold?",
+      "choices": ["Ag", "Au", "Gd", "Go"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It comes from the Latin word 'aurum.'",
+      "explanation": "Gold's chemical symbol is Au."
+    },
+    {
+      "id": "sau-2",
+      "type": "multiple-choice",
+      "prompt": "Which organ pumps blood through the human body?",
+      "choices": ["Liver", "Heart", "Lung", "Kidney"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It beats throughout your life.",
+      "explanation": "The heart pumps blood through the circulatory system."
+    },
+    {
+      "id": "sau-3",
+      "type": "fill-blank",
+      "prompt": "The force that pulls objects toward Earth is _____.",
+      "blankAnswer": "gravity",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It also keeps planets in orbit around the Sun.",
+      "explanation": "Gravity is the force of attraction between masses."
+    },
+    {
+      "id": "sau-4",
+      "type": "multiple-choice",
+      "prompt": "Which part of a plant carries out most photosynthesis?",
+      "choices": ["Roots", "Leaves", "Bark", "Seeds"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "They contain chlorophyll.",
+      "explanation": "Leaves contain chlorophyll and are the main site of photosynthesis in many plants."
+    },
+    {
+      "id": "sau-5",
+      "type": "true-false",
+      "prompt": "Sound travels faster in water than in air.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Particles are closer together in water.",
+      "explanation": "Sound generally travels faster in water than in air because water transmits vibrations more efficiently."
+    },
+    {
+      "id": "sau-6",
+      "type": "multiple-choice",
+      "prompt": "What is the largest planet in our solar system?",
+      "choices": ["Earth", "Saturn", "Jupiter", "Neptune"],
+      "correctIndex": 2,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is famous for the Great Red Spot.",
+      "explanation": "Jupiter is the largest planet in our solar system."
+    },
+    {
+      "id": "sau-7",
+      "type": "multiple-choice",
+      "prompt": "Which scale is commonly used to measure earthquake magnitude?",
+      "choices": ["Beaufort", "Richter", "Kelvin", "Decibel"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is named after a seismologist.",
+      "explanation": "The Richter scale is a well-known scale for earthquake magnitude, though modern measurements often use related moment magnitude scales."
+    },
+    {
+      "id": "sau-8",
+      "type": "multiple-choice",
+      "prompt": "Which blood cells help fight infection?",
+      "choices": ["White blood cells", "Platelets", "Red blood cells", "Plasma"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Their name points to their color category, not their job.",
+      "explanation": "White blood cells are part of the immune system and help fight infections."
+    },
+    {
+      "id": "sau-9",
+      "type": "true-false",
+      "prompt": "Water's chemical formula is H2O.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It has two hydrogen atoms and one oxygen atom.",
+      "explanation": "Water is made of two hydrogen atoms and one oxygen atom, giving it the formula H2O."
+    },
+    {
+      "id": "sau-10",
+      "type": "multiple-choice",
+      "prompt": "What type of celestial object is the Sun?",
+      "choices": ["Planet", "Comet", "Star", "Moon"],
+      "correctIndex": 2,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It produces light and heat through nuclear fusion.",
+      "explanation": "The Sun is a star at the center of our solar system."
+    }
+  ]
+}

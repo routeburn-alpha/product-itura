@@ -1,0 +1,136 @@
+{
+  "id": "championship-trivia",
+  "title": "Championship Trivia",
+  "category": "Mixed Trivia",
+  "description": "A challenging final round across history, science, sports, geography, and culture.",
+  "questions": [
+    {
+      "id": "ct-1",
+      "type": "multiple-choice",
+      "prompt": "Which scientist proposed the three laws of motion in 'Principia Mathematica'?",
+      "choices": ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Nikola Tesla"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The same scientist is associated with universal gravitation.",
+      "explanation": "Isaac Newton presented the three laws of motion in 'Philosophiae Naturalis Principia Mathematica.' For further study, review classical mechanics."
+    },
+    {
+      "id": "ct-2",
+      "type": "multiple-choice",
+      "prompt": "Which empire built Machu Picchu?",
+      "choices": ["Inca", "Maya", "Aztec", "Olmec"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The site is high in the Andes of Peru.",
+      "explanation": "Machu Picchu was built by the Inca civilization. For further study, explore Andean history and Inca engineering."
+    },
+    {
+      "id": "ct-3",
+      "type": "true-false",
+      "prompt": "The Suez Canal connects the Mediterranean Sea and the Red Sea.",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is a major shipping route through Egypt.",
+      "explanation": "The Suez Canal links the Mediterranean Sea with the Red Sea. For further study, review global trade routes and canal history."
+    },
+    {
+      "id": "ct-4",
+      "type": "fill-blank",
+      "prompt": "The process by which liquid water becomes vapor is _____.",
+      "blankAnswer": "evaporation",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is part of the water cycle.",
+      "explanation": "Evaporation is the process of liquid water becoming water vapor. For further study, review phase changes and the water cycle."
+    },
+    {
+      "id": "ct-5",
+      "type": "multiple-choice",
+      "prompt": "Which composer wrote the four-concerto set known as 'The Four Seasons'?",
+      "choices": ["Antonio Vivaldi", "Johann Sebastian Bach", "Wolfgang Amadeus Mozart", "Ludwig van Beethoven"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "He was an Italian Baroque composer.",
+      "explanation": "Antonio Vivaldi composed 'The Four Seasons.' For further study, review Baroque music and programmatic composition."
+    },
+    {
+      "id": "ct-6",
+      "type": "multiple-choice",
+      "prompt": "Which country won the first FIFA World Cup in 1930?",
+      "choices": ["Uruguay", "Brazil", "Argentina", "Italy"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The host nation won the tournament.",
+      "explanation": "Uruguay hosted and won the first FIFA World Cup in 1930. For further study, review early World Cup history."
+    },
+    {
+      "id": "ct-7",
+      "type": "multiple-choice",
+      "prompt": "Which author created the detective Sherlock Holmes?",
+      "choices": ["Arthur Conan Doyle", "Agatha Christie", "Edgar Allan Poe", "G.K. Chesterton"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The stories often feature Dr. Watson.",
+      "explanation": "Arthur Conan Doyle created Sherlock Holmes. For further study, review the development of detective fiction."
+    },
+    {
+      "id": "ct-8",
+      "type": "true-false",
+      "prompt": "The element carbon is found in diamonds and graphite.",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "They are different forms of the same element.",
+      "explanation": "Diamonds and graphite are allotropes of carbon. For further study, review crystal structures and allotropes."
+    },
+    {
+      "id": "ct-9",
+      "type": "multiple-choice",
+      "prompt": "Which treaty ended the American Revolutionary War?",
+      "choices": ["Treaty of Paris", "Treaty of Versailles", "Treaty of Tordesillas", "Treaty of Ghent"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It was signed in 1783.",
+      "explanation": "The Treaty of Paris of 1783 ended the American Revolutionary War. For further study, review the diplomacy of the American Revolution."
+    },
+    {
+      "id": "ct-10",
+      "type": "multiple-choice",
+      "prompt": "Which island is shared by Haiti and the Dominican Republic?",
+      "choices": ["Hispaniola", "Jamaica", "Cuba", "Barbados"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is the second-largest island in the Caribbean.",
+      "explanation": "Hispaniola is shared by Haiti and the Dominican Republic. For further study, review Caribbean geography."
+    },
+    {
+      "id": "ct-11",
+      "type": "fill-blank",
+      "prompt": "The ancient trade route network linking East and West is known as the Silk _____.",
+      "blankAnswer": "Road",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "Its name refers to a valuable textile.",
+      "explanation": "The Silk Road connected regions of Asia, the Middle East, Africa, and Europe through trade. For further study, explore cross-cultural exchange along trade routes."
+    },
+    {
+      "id": "ct-12",
+      "type": "multiple-choice",
+      "prompt": "Which telescope, launched in 1990, transformed public images of deep space?",
+      "choices": ["Hubble Space Telescope", "Kepler Space Telescope", "Spitzer Space Telescope", "Chandra X-ray Observatory"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It shares a name with astronomer Edwin Hubble.",
+      "explanation": "The Hubble Space Telescope launched in 1990 and produced many influential space images. For further study, review space telescope missions."
+    }
+  ]
+}

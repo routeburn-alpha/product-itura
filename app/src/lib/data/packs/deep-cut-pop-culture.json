@@ -1,0 +1,136 @@
+{
+  "id": "deep-cut-pop-culture",
+  "title": "Deep-Cut Pop Culture",
+  "category": "Pop Culture",
+  "description": "Harder entertainment trivia for film, music, TV, awards, and franchise fans.",
+  "questions": [
+    {
+      "id": "dpc-1",
+      "type": "multiple-choice",
+      "prompt": "Which film won the first Academy Award for Best Animated Feature?",
+      "choices": ["Shrek", "Toy Story", "Finding Nemo", "Spirited Away"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The category was first awarded for films released in 2001.",
+      "explanation": "'Shrek' won the first Oscar for Best Animated Feature. For further study, review Academy Award category history."
+    },
+    {
+      "id": "dpc-2",
+      "type": "multiple-choice",
+      "prompt": "Which artist's real name was Prince Rogers Nelson?",
+      "choices": ["Prince", "Stevie Wonder", "Marvin Gaye", "David Bowie"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "His stage name was also his given first name.",
+      "explanation": "Prince was born Prince Rogers Nelson. For further study, explore the Minneapolis sound and Prince's discography."
+    },
+    {
+      "id": "dpc-3",
+      "type": "true-false",
+      "prompt": "'The Empire Strikes Back' was released before 'Return of the Jedi.'",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The original trilogy's middle chapter came out in 1980.",
+      "explanation": "'The Empire Strikes Back' was released in 1980, before 'Return of the Jedi' in 1983. For further study, review Star Wars release order versus story chronology."
+    },
+    {
+      "id": "dpc-4",
+      "type": "fill-blank",
+      "prompt": "The fictional coffee shop in 'Friends' is Central _____.",
+      "blankAnswer": "Perk",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The name is a coffee pun.",
+      "explanation": "The coffee shop is Central Perk. For further study, compare recurring sitcom locations and how they anchor ensemble shows."
+    },
+    {
+      "id": "dpc-5",
+      "type": "multiple-choice",
+      "prompt": "Which director made both 'Jaws' and 'E.T. the Extra-Terrestrial'?",
+      "choices": ["Steven Spielberg", "George Lucas", "James Cameron", "Ridley Scott"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "He is also associated with Indiana Jones.",
+      "explanation": "Steven Spielberg directed both 'Jaws' and 'E.T. the Extra-Terrestrial.' For further study, trace Spielberg's blockbuster influence."
+    },
+    {
+      "id": "dpc-6",
+      "type": "multiple-choice",
+      "prompt": "Which novel introduced the character Katniss Everdeen?",
+      "choices": ["Divergent", "The Hunger Games", "Twilight", "The Maze Runner"],
+      "correctIndex": 1,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "She volunteers as tribute.",
+      "explanation": "Katniss Everdeen is the protagonist of 'The Hunger Games.' For further study, review 2000s young adult dystopian fiction."
+    },
+    {
+      "id": "dpc-7",
+      "type": "multiple-choice",
+      "prompt": "Which band released the album 'OK Computer'?",
+      "choices": ["Radiohead", "Oasis", "Blur", "Nirvana"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The band is also known for 'Paranoid Android.'",
+      "explanation": "Radiohead released 'OK Computer' in 1997. For further study, explore 1990s alternative rock landmarks."
+    },
+    {
+      "id": "dpc-8",
+      "type": "true-false",
+      "prompt": "The character Gollum appears in 'The Lord of the Rings.'",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "He is obsessed with the One Ring.",
+      "explanation": "Gollum is a major character in J.R.R. Tolkien's Middle-earth stories. For further study, review the role of the One Ring across the trilogy."
+    },
+    {
+      "id": "dpc-9",
+      "type": "multiple-choice",
+      "prompt": "Which actor played Jack Dawson in 'Titanic'?",
+      "choices": ["Leonardo DiCaprio", "Brad Pitt", "Matt Damon", "Johnny Depp"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "He later won an Oscar for 'The Revenant.'",
+      "explanation": "Leonardo DiCaprio played Jack Dawson in 'Titanic.' For further study, compare late-1990s blockbuster star turns."
+    },
+    {
+      "id": "dpc-10",
+      "type": "multiple-choice",
+      "prompt": "Which TV series includes the fictional continent of Westeros?",
+      "choices": ["Game of Thrones", "The Witcher", "The Mandalorian", "Lost"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is based on George R.R. Martin's fantasy novels.",
+      "explanation": "Westeros is a major setting in 'Game of Thrones.' For further study, review fantasy worldbuilding in television adaptations."
+    },
+    {
+      "id": "dpc-11",
+      "type": "fill-blank",
+      "prompt": "The fictional African nation in 'Black Panther' is _____.",
+      "blankAnswer": "Wakanda",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is technologically advanced and rich in vibranium.",
+      "explanation": "Wakanda is the fictional home of Black Panther. For further study, explore how superhero settings shape character identity."
+    },
+    {
+      "id": "dpc-12",
+      "type": "multiple-choice",
+      "prompt": "Which musical features the song 'My Shot'?",
+      "choices": ["Hamilton", "Wicked", "Rent", "The Lion King"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is about Alexander Hamilton.",
+      "explanation": "'My Shot' is from the musical 'Hamilton.' For further study, review modern Broadway cast albums and historical musicals."
+    }
+  ]
+}
