@@ -110,7 +110,6 @@
 	}
 
 	.pack-section {
-		border-top: var(--border-width) solid var(--color-border);
 		padding-top: 1.5rem;
 	}
 

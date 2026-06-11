@@ -14,7 +14,6 @@
 		packs.reduce((questionCount, pack) => questionCount + pack.questions.length, 0)
 	);
 	const presentedPack = $derived(randomPack ?? packs[0] ?? null);
-	const previewPacks = $derived(packs.slice(0, 2));
 
 	const recentPackStorageKey = 'quiz-lab-recent-random-packs';
 
@@ -104,6 +103,11 @@
 					<span>sharper</span>
 					<span>faster</span>
 					<span>focused</span>
+					<span>smarter</span>
+					<span>brighter</span>
+					<span>tougher</span>
+					<span>quicker</span>
+					<span>livelier</span>
 				</span>
 				quizzes.
 			</h1>
@@ -156,28 +160,6 @@
 			</div>
 		</div>
 	</section>
-
-	{#if previewPacks.length > 0}
-		<section class="pack-strip" aria-labelledby="landing-packs-title">
-			<div class="strip-heading">
-				<div>
-					<p class="eyebrow">Published packs</p>
-					<h2 id="landing-packs-title">Choose a focused round</h2>
-				</div>
-				<a href="{base}/packs">View all packs</a>
-			</div>
-
-			<div class="preview-grid">
-				{#each previewPacks as pack (pack.id)}
-					<a class="preview-pack" href="{base}/play/{pack.id}">
-						<span>{pack.category}</span>
-						<strong>{pack.title}</strong>
-						<small>{pack.questions.length} questions</small>
-					</a>
-				{/each}
-			</div>
-		</section>
-	{/if}
 </main>
 
 <style>
@@ -200,7 +182,6 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		border-bottom: var(--border-width) solid var(--color-border);
 		padding: var(--space-10) 0;
 	}
 
@@ -239,7 +220,7 @@
 	.animated-word span {
 		display: block;
 		height: 1.04em;
-		animation: word-shift 6s infinite;
+		animation: word-shift 14s infinite;
 	}
 
 	.subtitle {
@@ -353,7 +334,6 @@
 	}
 
 	.summary-grid div {
-		border-top: var(--border-width) solid var(--color-border);
 		padding-top: var(--space-4);
 	}
 
@@ -374,92 +354,38 @@
 		font-weight: var(--font-weight-semibold);
 	}
 
-	.pack-strip {
-		border-top: var(--border-width) solid var(--color-border);
-		margin-top: var(--space-6);
-		padding-top: var(--space-6);
-	}
-
-	.strip-heading {
-		display: flex;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: var(--space-4);
-		margin-bottom: var(--space-4);
-	}
-
-	.strip-heading h2 {
-		margin: 0;
-		font-size: var(--font-size-lg);
-		line-height: 1.2;
-		letter-spacing: 0;
-	}
-
-	.strip-heading a {
-		border-radius: var(--radius-md);
-		color: var(--color-green);
-		font-size: var(--font-size-sm);
-		font-weight: var(--font-weight-semibold);
-		padding: 0.45rem 0.55rem;
-		text-decoration: none;
-	}
-
-	.strip-heading a:hover {
-		background: var(--color-surface-muted);
-		color: var(--color-green-hover);
-	}
-
-	.preview-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--space-4);
-	}
-
-	.preview-pack {
-		display: grid;
-		gap: var(--space-2);
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		padding: var(--space-4);
-		color: inherit;
-		text-decoration: none;
-		transition:
-			background var(--motion-duration-hover) var(--motion-ease-standard),
-			border-color var(--motion-duration-hover) var(--motion-ease-standard),
-			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
-	}
-
-	.preview-pack:hover {
-		border-color: var(--color-green-border);
-		background: var(--color-surface-muted);
-		box-shadow: var(--shadow-hover);
-	}
-
-	.preview-pack span,
-	.preview-pack small {
-		color: var(--color-text-muted);
-		font-size: var(--font-size-sm);
-		font-weight: var(--font-weight-semibold);
-	}
-
-	.preview-pack strong {
-		font-size: var(--font-size-md);
-		line-height: 1.25;
-	}
-
 	@keyframes word-shift {
 		0%,
-		28% {
+		10% {
 			transform: translateY(0);
 		}
-		34%,
-		62% {
+		12.5%,
+		22.5% {
 			transform: translateY(-1.04em);
 		}
-		68%,
-		96% {
+		25%,
+		35% {
 			transform: translateY(-2.08em);
+		}
+		37.5%,
+		47.5% {
+			transform: translateY(-3.12em);
+		}
+		50%,
+		60% {
+			transform: translateY(-4.16em);
+		}
+		62.5%,
+		72.5% {
+			transform: translateY(-5.2em);
+		}
+		75%,
+		85% {
+			transform: translateY(-6.24em);
+		}
+		87.5%,
+		97.5% {
+			transform: translateY(-7.28em);
 		}
 		100% {
 			transform: translateY(0);
@@ -496,16 +422,6 @@
 
 		.subtitle {
 			font-size: var(--font-size-md);
-		}
-
-		.strip-heading {
-			align-items: flex-start;
-			flex-direction: column;
-			gap: var(--space-2);
-		}
-
-		.preview-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>
