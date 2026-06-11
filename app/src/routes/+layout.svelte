@@ -26,7 +26,7 @@
 	<nav class="top-nav" aria-label="Primary">
 		<a class="brand" href="{base}/">Quiz Lab</a>
 		<div class="nav-links">
-			<a href="{base}/">Packs</a>
+			<a href="{base}/packs">Packs</a>
 			<a href="{base}/create">Create quiz</a>
 			<details class="theme-menu" bind:open={appearanceOpen}>
 				<summary>Appearance</summary>
