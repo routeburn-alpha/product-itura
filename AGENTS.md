@@ -4,6 +4,7 @@
 - keep green:
   ```
   # from app/
+  npm ci
   npm run check
   npm run build
   npm test
