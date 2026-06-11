@@ -106,7 +106,7 @@
 				Pick a published pack, test your recall, or build a new quiz draft from the same focused workspace.
 			</p>
 			<div class="hero-actions" aria-label="Landing page actions">
-				<a class="primary-action" href="{base}/">Browse packs</a>
+				<a class="primary-action" href="{base}/packs">Browse packs</a>
 				<a class="secondary-action" href="{base}/create">Create quiz</a>
 			</div>
 		</div>
