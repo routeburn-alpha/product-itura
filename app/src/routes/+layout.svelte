@@ -9,13 +9,55 @@
 
 	let { children } = $props();
 	let appearanceOpen = $state(false);
+	let appearanceButton = $state<HTMLButtonElement | null>(null);
+	let appearancePopover = $state<HTMLDivElement | null>(null);
 
 	if (browser) {
 		themeStore.init();
 		ratingsStore.init();
 	}
 
-	onMount(() => themeStore.watchSystemPreference());
+	function toggleAppearance() {
+		appearanceOpen = !appearanceOpen;
+	}
+
+	function closeAppearance({ restoreFocus = false } = {}) {
+		appearanceOpen = false;
+
+		if (restoreFocus) {
+			appearanceButton?.focus();
+		}
+	}
+
+	onMount(() => {
+		const stopThemePreferenceWatch = themeStore.watchSystemPreference();
+
+		function handleDocumentPointerDown(event: PointerEvent) {
+			if (!appearanceOpen || !(event.target instanceof Node)) return;
+
+			if (appearanceButton?.contains(event.target) || appearancePopover?.contains(event.target)) {
+				return;
+			}
+
+			closeAppearance();
+		}
+
+		function handleDocumentKeydown(event: KeyboardEvent) {
+			if (!appearanceOpen || event.key !== 'Escape') return;
+
+			event.preventDefault();
+			closeAppearance({ restoreFocus: true });
+		}
+
+		document.addEventListener('pointerdown', handleDocumentPointerDown);
+		document.addEventListener('keydown', handleDocumentKeydown);
+
+		return () => {
+			stopThemePreferenceWatch();
+			document.removeEventListener('pointerdown', handleDocumentPointerDown);
+			document.removeEventListener('keydown', handleDocumentKeydown);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -28,12 +70,30 @@
 		<div class="nav-links">
 			<a href="{base}/">Packs</a>
 			<a href="{base}/create">Create quiz</a>
-			<details class="theme-menu" bind:open={appearanceOpen}>
-				<summary>Appearance</summary>
-				<div class="theme-popover">
+			<div class="theme-menu">
+				<button
+					bind:this={appearanceButton}
+					type="button"
+					class="theme-trigger"
+					aria-controls="appearance-popover"
+					aria-expanded={appearanceOpen}
+					onclick={toggleAppearance}
+				>
+					Appearance
+				</button>
+				<div
+					bind:this={appearancePopover}
+					id="appearance-popover"
+					class="theme-popover"
+					class:open={appearanceOpen}
+					role="dialog"
+					aria-hidden={!appearanceOpen}
+					aria-label="Appearance options"
+					inert={!appearanceOpen}
+				>
 					<ThemePicker compact />
 				</div>
-			</details>
+			</div>
 			<a href="https://github.com/routeburn-alpha/product-itura" rel="noopener" target="_blank">
 				GitHub
 			</a>
@@ -175,8 +235,10 @@
 	}
 
 	.nav-links a,
-	.theme-menu summary {
+	.theme-trigger {
+		border: 0;
 		border-radius: var(--radius-md);
+		background: transparent;
 		color: var(--color-text-muted);
 		cursor: pointer;
 		display: block;
@@ -188,8 +250,8 @@
 	}
 
 	.nav-links a:hover,
-	.theme-menu[open] summary,
-	.theme-menu summary:hover {
+	.theme-trigger[aria-expanded='true'],
+	.theme-trigger:hover {
 		background: var(--color-surface-muted);
 		color: var(--color-green);
 	}
@@ -198,19 +260,42 @@
 		position: relative;
 	}
 
-	.theme-menu summary {
-		list-style: none;
-	}
-
-	.theme-menu summary::-webkit-details-marker {
-		display: none;
-	}
-
 	.theme-popover {
+		opacity: 0;
+		pointer-events: none;
 		position: absolute;
 		top: calc(100% + 0.55rem);
 		right: 0;
+		transform: translateY(-0.35rem) scale(0.98);
+		transform-origin: top right;
+		transition:
+			opacity var(--motion-duration-exit) var(--motion-ease-standard),
+			transform var(--motion-duration-exit) var(--motion-ease-standard),
+			visibility 0s linear var(--motion-duration-exit);
+		visibility: hidden;
+		will-change: opacity, transform;
 		z-index: 20;
+	}
+
+	.theme-popover.open {
+		opacity: 1;
+		pointer-events: auto;
+		transform: translateY(0) scale(1);
+		transition:
+			opacity var(--motion-duration-entry) var(--motion-ease-standard),
+			transform var(--motion-duration-entry) var(--motion-ease-standard),
+			visibility 0s;
+		visibility: visible;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.theme-popover,
+		.theme-popover.open {
+			transform: none;
+			transition:
+				opacity var(--motion-duration-exit) var(--motion-ease-standard),
+				visibility 0s linear var(--motion-duration-exit);
+		}
 	}
 
 	@media (max-width: 560px) {
@@ -227,7 +312,7 @@
 		}
 
 		.nav-links a,
-		.theme-menu summary {
+		.theme-trigger {
 			text-align: center;
 		}
 
@@ -240,6 +325,7 @@
 			top: 7rem;
 			right: var(--space-4);
 			left: var(--space-4);
+			transform-origin: top center;
 		}
 	}
 </style>

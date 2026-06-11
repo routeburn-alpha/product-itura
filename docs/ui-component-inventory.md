@@ -34,9 +34,9 @@ inconsistencies already cataloged in [`ui-audit.md`](./ui-audit.md).
 | Lists and summaries | Pack grid, result stats, answer review lists, saved question list, managed draggable list | Home, player, creator |
 | Empty states | Empty pack, builder locked state, no saved questions, unavailable share link | Player, shared, creator |
 
-There are no modal, dialog, popover, toast, tab, table, menu, or tooltip
-components in the current UI. Native browser controls provide the only dropdown
-behavior through `<select>`.
+There are no modal, toast, tab, table, menu, or tooltip components in the current
+UI. The app shell has one non-modal appearance popover, and native browser
+controls provide dropdown behavior through `<select>`.
 
 ## 1. App Chrome and Navigation
 
@@ -44,15 +44,15 @@ behavior through `<select>`.
 | --- | --- | --- | --- | --- |
 | Site header | `+layout.svelte` (`.site-header`) | Single global instance | Wraps primary navigation on every page | White surface, bottom divider, full width. |
 | Top nav | `+layout.svelte` (`.top-nav`) | Desktop row, mobile stacked layout | Provides brand, pack picker, creator, and GitHub links | 1080px max width, local font declaration duplicated with page containers. |
-| Brand link | `+layout.svelte` (`.brand`) | Default only | Navigates to pack picker | Strong text link, no custom hover/focus style. |
-| Nav links | `+layout.svelte` (`.nav-links a`) | Default, hover | Internal links plus external GitHub link | Rounded text links; hover currently uses a blue accent that differs from the green studio palette. |
+| Brand link | `+layout.svelte` (`.brand`) | Default, focus | Navigates to pack picker | Strong text link with the shared focus ring. |
+| Nav links | `+layout.svelte` (`.nav-links a`) | Default, hover, focus | Internal links plus external GitHub link | Rounded text links with tokenized green hover/focus transitions. |
+| Appearance popover | `+layout.svelte` (`.theme-trigger`, `.theme-popover`) | Closed, opening/open, closing, mobile fixed panel | Opens theme selection without leaving the current route | Non-modal button-controlled overlay with opacity/scale entry and exit, outside-click close, and Escape close. |
 | Back link | `QuizPlayer.svelte`, `play/shared/+page.svelte` (`.back-link`) | Default, hover | Returns to pack picker or caller-provided href | Text-only link, green hover, repeated in two scoped style blocks. |
 | Pack card link | `+page.svelte` (`.pack-card`) | Default, hover | Entire card navigates to a pack route | Card-as-link pattern; hover lifts and changes border/accent. |
 
-Inventory note: navigation is implemented with real anchors throughout, which is
-good for semantics. Focus styling is inconsistent: pack cards have custom focus
-in the earlier audit snapshot, while current nav/back links mostly rely on
-browser defaults.
+Inventory note: navigation is implemented with real anchors and a real
+appearance button, which is good for semantics. Focus styling uses the shared
+global focus ring.
 
 ## 2. Page Structure
 
@@ -207,10 +207,10 @@ These are the strongest candidates for follow-up extraction or tokenization:
 
 ## 12. Gaps and Non-Components
 
-- No modal/dialog system exists.
+- No modal system exists; the app shell has one non-modal appearance dialog/popover.
 - No toast/notification system exists; feedback is inline.
 - No tooltip system exists; rich-toolbar buttons use native `title` attributes.
-- No custom menu/dropdown system exists; category selection uses a native `<select>`.
+- No custom menu/dropdown system exists beyond the appearance popover; category selection uses a native `<select>`.
 - No shared icon component exists; the UI uses text, B/I formatting glyphs, bullets, and simple arrow text.
 - No table component exists; summary data is displayed with grids and lists.
 - No shared Svelte component library exists except `QuizPlayer.svelte`.
