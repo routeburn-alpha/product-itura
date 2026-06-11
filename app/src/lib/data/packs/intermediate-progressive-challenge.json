@@ -1,0 +1,170 @@
+{
+  "id": "intermediate-progressive-challenge",
+  "title": "Intermediate Progressive Challenge",
+  "category": "Intermediate / Mixed",
+  "description": "A mixed review that ramps from core concepts to scenario analysis.",
+  "questions": [
+    {
+      "id": "ipc-1",
+      "type": "multiple-choice",
+      "prompt": "Which pair best matches a concept with its purpose?",
+      "choices": [
+        "Learning objective: defines the intended learner outcome",
+        "Distractor: proves the correct answer",
+        "Confounder: removes all uncertainty",
+        "Feedback: hides the reason for the answer"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Look for the pair where the definition truly fits the term.",
+      "explanation": "A learning objective states what the learner should know or be able to do."
+    },
+    {
+      "id": "ipc-2",
+      "type": "true-false",
+      "prompt": "A good distractor should be plausible enough to reveal a misconception.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Distractors are not random filler.",
+      "explanation": "Plausible distractors help diagnose misunderstandings and make explanations more useful."
+    },
+    {
+      "id": "ipc-3",
+      "type": "fill-blank",
+      "prompt": "Applying a known idea to a new situation is called _____.",
+      "blankAnswer": "transfer",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The idea moves from one context to another.",
+      "explanation": "Transfer means using learning in a different but related situation."
+    },
+    {
+      "id": "ipc-4",
+      "type": "multiple-choice",
+      "prompt": "A learner answers definitions correctly but misses scenario questions. What is the most likely next need?",
+      "choices": [
+        "Practice applying the definitions in context",
+        "More practice copying definitions only",
+        "A lower-quality explanation",
+        "A quiz with no feedback"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The gap is not basic recall; it is use in context.",
+      "explanation": "Scenario misses suggest the learner needs application practice, not only more definition recall."
+    },
+    {
+      "id": "ipc-5",
+      "type": "multiple-choice",
+      "prompt": "A result says, '8 of 10 learners finished the quiz.' What does this directly measure?",
+      "choices": [
+        "Completion rate",
+        "Average score quality",
+        "Question difficulty",
+        "Cause of improvement"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Finishing and scoring are different outcomes.",
+      "explanation": "The statement directly reports completion, not accuracy or causation."
+    },
+    {
+      "id": "ipc-6",
+      "type": "true-false",
+      "prompt": "A single score can be useful evidence, but it rarely tells the whole story by itself.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "One data point may need context.",
+      "explanation": "A single score can guide a next step, but trends, comparisons, and context make the evidence stronger."
+    },
+    {
+      "id": "ipc-7",
+      "type": "multiple-choice",
+      "prompt": "A question asks learners to pick the strongest claim from a set of evidence. Which answer pattern is safest?",
+      "choices": [
+        "The claim that is specific and directly supported",
+        "The claim that sounds absolute",
+        "The claim that ignores the evidence",
+        "The claim that adds the most new assumptions"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Strong claims are not always broad claims.",
+      "explanation": "A specific, directly supported claim is stronger than a broad claim that overreaches."
+    },
+    {
+      "id": "ipc-8",
+      "type": "fill-blank",
+      "prompt": "A detail that changes which answer is best is _____.",
+      "blankAnswer": "relevant",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It matters to the decision.",
+      "explanation": "Relevant details affect the answer or reasoning path."
+    },
+    {
+      "id": "ipc-9",
+      "type": "multiple-choice",
+      "prompt": "A teacher wants to know whether students can explain, not just select, the answer. Which item is best?",
+      "choices": [
+        "A short-answer prompt asking for the reason behind a choice",
+        "A multiple-choice item with no explanation afterward",
+        "A timer-only activity",
+        "A question that asks for the student's favorite color"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The item should require the learner to produce reasoning.",
+      "explanation": "A short-answer prompt can reveal whether the learner can explain the reason, not only recognize an answer."
+    },
+    {
+      "id": "ipc-10",
+      "type": "multiple-choice",
+      "prompt": "A learner improves on practice questions but not on mixed review. What is a likely issue?",
+      "choices": [
+        "They may recognize isolated patterns but struggle to choose strategies when topics are mixed",
+        "They have already mastered every possible skill",
+        "Mixed review cannot reveal anything useful",
+        "Practice questions caused the app to lose data"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Mixed review tests selection as well as knowledge.",
+      "explanation": "Mixed review requires learners to decide which concept or strategy applies, which is harder than focused practice."
+    },
+    {
+      "id": "ipc-11",
+      "type": "true-false",
+      "prompt": "When a scenario has multiple plausible answers, the best answer should be the one most supported by the scenario constraints.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Constraints narrow the answer choices.",
+      "explanation": "Scenario constraints help determine which plausible answer is strongest in that specific case."
+    },
+    {
+      "id": "ipc-12",
+      "type": "multiple-choice",
+      "prompt": "A learner must decide what to study after missing three question types: definitions, scenarios, and evidence evaluation. Which plan is most strategic?",
+      "choices": [
+        "Start with definitions, apply them in scenarios, then review evidence evaluation with explanations",
+        "Only study the last missed question",
+        "Avoid the missed topics and replay mastered questions",
+        "Randomly pick one topic and ignore feedback"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Build from foundations toward more complex analysis.",
+      "explanation": "The plan progresses from fundamentals to application to analysis, matching the increasing complexity of the missed skills."
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "id": "intermediate-evidence-review",
+  "title": "Intermediate Evidence Review",
+  "category": "Intermediate / Analysis",
+  "description": "Evaluate claims, spot limits in evidence, and choose careful conclusions.",
+  "questions": [
+    {
+      "id": "ier-1",
+      "type": "multiple-choice",
+      "prompt": "A class tried a new review method. Average scores rose from 70 to 78. What is the most careful conclusion?",
+      "choices": [
+        "Scores improved after the method, but more evidence is needed to prove the method caused it",
+        "The method caused every student to improve",
+        "The method had no possible relationship to the scores",
+        "The scores prove the next class will average 90"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Before-and-after evidence is useful but limited.",
+      "explanation": "The scores improved, but without more controls or context, causation should be stated carefully."
+    },
+    {
+      "id": "ier-2",
+      "type": "multiple-choice",
+      "prompt": "A survey includes only three people from a group of two hundred. What is the main limitation?",
+      "choices": [
+        "The sample may be too small to represent the full group",
+        "The survey has too many participants",
+        "The results must be perfectly accurate",
+        "The group size no longer matters"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Ask whether the evidence represents the larger group.",
+      "explanation": "A very small sample can miss important variation in the full group."
+    },
+    {
+      "id": "ier-3",
+      "type": "true-false",
+      "prompt": "When two sources disagree, the stronger source is always the one that sounds more confident.",
+      "trueFalseAnswer": false,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Confidence and evidence are different.",
+      "explanation": "Source strength depends on evidence, method, relevance, and reliability, not just confident wording."
+    },
+    {
+      "id": "ier-4",
+      "type": "fill-blank",
+      "prompt": "A hidden factor that may affect both the supposed cause and the result is a _____.",
+      "blankAnswer": "confounder",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It can confuse the relationship being studied.",
+      "explanation": "A confounder is an outside factor that can distort a cause-and-effect interpretation."
+    },
+    {
+      "id": "ier-5",
+      "type": "multiple-choice",
+      "prompt": "A learner's practice scores are 7, 8, 9, 3, and 10. What should an analyst notice first?",
+      "choices": [
+        "There is a generally rising pattern with one unusually low score",
+        "The scores are all identical",
+        "The final score is the lowest",
+        "There is no information to compare"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Look for both the trend and the unusual value.",
+      "explanation": "The scores mostly rise, while the 3 stands out as a possible outlier or special case."
+    },
+    {
+      "id": "ier-6",
+      "type": "multiple-choice",
+      "prompt": "A claim says, 'This strategy works for everyone,' but the evidence comes from one learner. What is the issue?",
+      "choices": [
+        "The claim is broader than the evidence supports",
+        "The evidence is too broad for the claim",
+        "One learner proves all possible cases",
+        "The claim is automatically false because it is short"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Compare the size of the claim with the size of the evidence.",
+      "explanation": "Evidence from one learner can be useful, but it cannot justify a universal claim by itself."
+    },
+    {
+      "id": "ier-7",
+      "type": "multiple-choice",
+      "prompt": "Which evidence would best test whether spaced practice helped a class?",
+      "choices": [
+        "Scores from comparable learners using spaced and non-spaced practice",
+        "The color of the classroom walls",
+        "A single comment from someone who did not practice",
+        "The number of pages in the textbook only"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "A comparison helps isolate the practice method.",
+      "explanation": "Comparable groups using different practice schedules would give stronger evidence about the effect of spacing."
+    },
+    {
+      "id": "ier-8",
+      "type": "true-false",
+      "prompt": "An outlier should be deleted automatically before anyone asks why it happened.",
+      "trueFalseAnswer": false,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Unusual data can be a mistake, but it can also be meaningful.",
+      "explanation": "Outliers should be investigated before deciding whether they are errors or important signals."
+    },
+    {
+      "id": "ier-9",
+      "type": "multiple-choice",
+      "prompt": "A chart shows completion rate but not score quality. What question remains unanswered?",
+      "choices": [
+        "Whether learners completed the quiz accurately",
+        "Whether anyone opened the quiz",
+        "Whether the quiz has a title",
+        "Whether the chart uses numbers"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Completion and quality are related but not identical.",
+      "explanation": "A completion rate shows who finished, but it does not show whether their answers were correct."
+    },
+    {
+      "id": "ier-10",
+      "type": "fill-blank",
+      "prompt": "A reasonable explanation that could also fit the evidence is an alternative _____.",
+      "blankAnswer": "explanation",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is another way to explain the same evidence.",
+      "explanation": "Considering alternative explanations helps avoid jumping to a single unsupported cause."
+    },
+    {
+      "id": "ier-11",
+      "type": "multiple-choice",
+      "prompt": "Which wording is most appropriate when evidence is suggestive but not conclusive?",
+      "choices": [
+        "The evidence suggests a possible relationship",
+        "The evidence proves the relationship in every case",
+        "No relationship can exist",
+        "The question cannot be discussed"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Careful wording should match the strength of the evidence.",
+      "explanation": "Suggestive evidence supports cautious language, not absolute proof."
+    },
+    {
+      "id": "ier-12",
+      "type": "multiple-choice",
+      "prompt": "A learner improves after getting tutoring and also begins sleeping more. What is the best analysis move?",
+      "choices": [
+        "Consider that tutoring, sleep, or both may have contributed",
+        "Assume tutoring is the only possible cause",
+        "Assume sleep is impossible to consider",
+        "Ignore both changes"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "More than one change happened at the same time.",
+      "explanation": "When multiple factors change, analysis should consider more than one possible contributor."
+    }
+  ]
+}

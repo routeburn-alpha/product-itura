@@ -1,0 +1,170 @@
+{
+  "id": "intermediate-concept-connections",
+  "title": "Intermediate Concept Connections",
+  "category": "Intermediate / Fundamentals",
+  "description": "Connect learning, reasoning, and evidence concepts across slightly deeper examples.",
+  "questions": [
+    {
+      "id": "icc-1",
+      "type": "multiple-choice",
+      "prompt": "A learner rereads a chapter twice but still cannot answer practice questions. Which concept best explains the gap?",
+      "choices": [
+        "Recognition can feel familiar without proving retrieval",
+        "Rereading always removes the need for practice",
+        "Practice questions only measure typing speed",
+        "Familiarity and mastery are identical"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Think about the difference between seeing an answer and producing it.",
+      "explanation": "Rereading can create familiarity, but retrieval practice checks whether the learner can recall and use the idea."
+    },
+    {
+      "id": "icc-2",
+      "type": "fill-blank",
+      "prompt": "The amount of mental effort a task places on working memory is cognitive _____.",
+      "blankAnswer": "load",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The phrase describes how heavy the task feels mentally.",
+      "explanation": "Cognitive load is the demand a task places on working memory."
+    },
+    {
+      "id": "icc-3",
+      "type": "true-false",
+      "prompt": "If two measures move together, that pattern alone proves that one caused the other.",
+      "trueFalseAnswer": false,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "A relationship can exist without proving direction or cause.",
+      "explanation": "Correlation can suggest a relationship, but causal claims need stronger evidence and attention to alternative explanations."
+    },
+    {
+      "id": "icc-4",
+      "type": "multiple-choice",
+      "prompt": "Why can comparing an example and a nonexample help someone learn a concept?",
+      "choices": [
+        "It highlights the defining feature that makes the concept apply",
+        "It guarantees every future problem has only one detail",
+        "It removes the need for explanations",
+        "It makes the concept depend on answer order"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "A nonexample is useful because it almost fits, but not quite.",
+      "explanation": "Example and nonexample comparisons clarify the boundaries of a concept by showing what counts and what does not."
+    },
+    {
+      "id": "icc-5",
+      "type": "multiple-choice",
+      "prompt": "A quiz objective says learners should 'compare two explanations,' but every question asks for definitions only. What is misaligned?",
+      "choices": [
+        "The assessment does not match the objective",
+        "The objective has too many words",
+        "Definitions can never be assessed",
+        "The quiz title is too short"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Compare the skill named by the objective with the skill required by the questions.",
+      "explanation": "Assessment questions should give learners a chance to demonstrate the skill named in the objective."
+    },
+    {
+      "id": "icc-6",
+      "type": "multiple-choice",
+      "prompt": "Which schedule best combines spacing and retrieval?",
+      "choices": [
+        "Short practice attempts on three different days with answers hidden first",
+        "One long rereading session with all answers visible",
+        "A single review after the quiz ends",
+        "Only reviewing the easiest card repeatedly"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The best option spreads practice and asks the learner to recall.",
+      "explanation": "Short attempts across multiple days with hidden answers combine spaced practice and retrieval practice."
+    },
+    {
+      "id": "icc-7",
+      "type": "fill-blank",
+      "prompt": "A cycle where an attempt leads to information that improves the next attempt is a feedback _____.",
+      "blankAnswer": "loop",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The process circles back into the next try.",
+      "explanation": "A feedback loop uses results from one attempt to adjust the next attempt."
+    },
+    {
+      "id": "icc-8",
+      "type": "multiple-choice",
+      "prompt": "A student sorts four scenarios by whether they include measurable evidence. Which thinking skill are they practicing?",
+      "choices": [
+        "Classification using a defining criterion",
+        "Memorizing answer positions",
+        "Avoiding comparison",
+        "Changing the topic"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "They are grouping examples according to a rule.",
+      "explanation": "Classification applies a criterion to decide which items belong together."
+    },
+    {
+      "id": "icc-9",
+      "type": "true-false",
+      "prompt": "Transfer means using a concept in a new situation, not only repeating it in the original example.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The key idea is using learning somewhere else.",
+      "explanation": "Transfer happens when learners apply knowledge or skills beyond the exact practice context."
+    },
+    {
+      "id": "icc-10",
+      "type": "multiple-choice",
+      "prompt": "A lesson starts with a worked example, then asks learners to solve a similar problem with fewer hints. Why is this sequence useful?",
+      "choices": [
+        "It gradually shifts responsibility from the example to the learner",
+        "It prevents learners from ever practicing independently",
+        "It makes the explanation optional in every case",
+        "It hides the goal of the lesson"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The support decreases as the learner gains footing.",
+      "explanation": "Fading support helps learners move from guided understanding toward independent performance."
+    },
+    {
+      "id": "icc-11",
+      "type": "fill-blank",
+      "prompt": "Knowledge needed before learning a more complex idea is called _____ knowledge.",
+      "blankAnswer": "prerequisite",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It comes before the new material.",
+      "explanation": "Prerequisite knowledge is the foundation a learner needs before tackling a more advanced concept."
+    },
+    {
+      "id": "icc-12",
+      "type": "multiple-choice",
+      "prompt": "A concept map is most useful when a learner needs to show what?",
+      "choices": [
+        "Relationships among ideas",
+        "The fastest way to click a button",
+        "A single memorized definition only",
+        "The number of letters in each answer"
+      ],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Concept maps connect nodes.",
+      "explanation": "Concept maps help learners organize and explain relationships among ideas."
+    }
+  ]
+}

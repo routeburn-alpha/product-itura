@@ -14,6 +14,7 @@ type BaseQuestion = {
 	prompt: string;
 	type?: QuestionType;
 	difficulty?: 1 | 2 | 3;
+	hint?: string;
 	explanation: string;
 	points?: number;
 };
