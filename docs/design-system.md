@@ -13,6 +13,8 @@ Supporting documents:
   standard that task #13 implemented in runtime CSS.
 - [`animation-audit.md`](./animation-audit.md): current transition coverage and
   prioritized motion opportunities for idea #5.
+- [`animation-examples.md`](./animation-examples.md): Storybook-ready animation
+  examples, state matrices, snippets, and accessibility notes for idea #5.
 
 ## Design principles
 
