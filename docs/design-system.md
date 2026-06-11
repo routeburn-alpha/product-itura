@@ -11,6 +11,8 @@ Supporting documents:
   family currently in the app.
 - [`ui-style-guide.md`](./ui-style-guide.md): the token definitions and migration
   standard that task #13 implemented in runtime CSS.
+- [`animation-audit.md`](./animation-audit.md): current transition coverage and
+  prioritized motion opportunities for idea #5.
 
 ## Design principles
 
