@@ -119,6 +119,20 @@
 		font-family: var(--font-sans);
 	}
 
+	:global(a),
+	:global(button),
+	:global(summary),
+	:global(input),
+	:global(textarea),
+	:global(select),
+	:global([role='textbox']) {
+		transition:
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
+	}
+
 	:global(a:focus-visible),
 	:global(button:focus-visible),
 	:global(summary:focus-visible),

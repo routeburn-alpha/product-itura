@@ -129,9 +129,9 @@
 		background: var(--color-surface);
 		padding: var(--space-3);
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.theme-option.selected {
