@@ -1,16 +1,92 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import type { Pack } from '$lib/packs';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		packs: Pack[];
 	};
 
 	let { packs }: Props = $props();
+	let randomPack = $state<Pack | null>(null);
 
 	const totalQuestions = $derived(
 		packs.reduce((questionCount, pack) => questionCount + pack.questions.length, 0)
 	);
+	const presentedPack = $derived(randomPack ?? packs[0] ?? null);
+
+	const recentPackStorageKey = 'quiz-lab-recent-random-packs';
+
+	function getRecentLimit() {
+		return Math.max(0, Math.min(3, packs.length - 1));
+	}
+
+	function readRecentPackIds() {
+		try {
+			const storedValue = localStorage.getItem(recentPackStorageKey);
+			const parsedValue = storedValue ? JSON.parse(storedValue) : [];
+
+			return Array.isArray(parsedValue)
+				? parsedValue.filter((id): id is string => typeof id === 'string')
+				: [];
+		} catch {
+			return [];
+		}
+	}
+
+	function writeRecentPackId(packId: string) {
+		const recentLimit = getRecentLimit();
+
+		if (recentLimit === 0) {
+			localStorage.removeItem(recentPackStorageKey);
+			return;
+		}
+
+		const recentPackIds = readRecentPackIds();
+		const nextRecentPackIds = [
+			packId,
+			...recentPackIds.filter((recentPackId) => recentPackId !== packId)
+		].slice(0, recentLimit);
+
+		localStorage.setItem(recentPackStorageKey, JSON.stringify(nextRecentPackIds));
+	}
+
+	function getRandomIndex(length: number) {
+		if (length <= 1) {
+			return 0;
+		}
+
+		const randomValues = new Uint32Array(1);
+
+		if (globalThis.crypto) {
+			globalThis.crypto.getRandomValues(randomValues);
+			return randomValues[0] % length;
+		}
+
+		return Math.floor(Math.random() * length);
+	}
+
+	function selectRandomPack() {
+		if (packs.length === 0) {
+			randomPack = null;
+			return;
+		}
+
+		const recentPackIds = readRecentPackIds();
+		const freshPacks = packs.filter((pack) => !recentPackIds.includes(pack.id));
+		const candidates = freshPacks.length > 0 ? freshPacks : packs;
+		const selectedPack = candidates[getRandomIndex(candidates.length)] ?? null;
+
+		randomPack = selectedPack;
+
+		if (selectedPack) {
+			writeRecentPackId(selectedPack.id);
+		}
+	}
+
+	onMount(() => {
+		selectRandomPack();
+	});
 </script>
 
 <main class="landing-shell">
@@ -35,16 +111,36 @@
 			</div>
 		</div>
 
-		<div class="summary-panel" aria-label="Published quiz library summary">
-			<p class="panel-label">Library ready</p>
-			<div class="summary-grid">
-				<div>
-					<strong>{packs.length}</strong>
-					<span>packs</span>
-				</div>
-				<div>
-					<strong>{totalQuestions}</strong>
-					<span>questions</span>
+		<div class="feature-stack">
+			<div class="random-panel" aria-live="polite">
+				<p class="panel-label">Random quiz</p>
+				{#if presentedPack}
+					<h2>{presentedPack.title}</h2>
+					<p>{presentedPack.description}</p>
+					<div class="quiz-meta">
+						<span>{presentedPack.category}</span>
+						<span>{presentedPack.questions.length} questions</span>
+					</div>
+					<div class="random-actions">
+						<a class="primary-action" href="{base}/play/{presentedPack.id}">Start random quiz</a>
+						<button type="button" class="secondary-action" onclick={selectRandomPack}>Shuffle</button>
+					</div>
+				{:else}
+					<p>No published quizzes are available yet.</p>
+				{/if}
+			</div>
+
+			<div class="summary-panel" aria-label="Published quiz library summary">
+				<p class="panel-label">Library ready</p>
+				<div class="summary-grid">
+					<div>
+						<strong>{packs.length}</strong>
+						<span>packs</span>
+					</div>
+					<div>
+						<strong>{totalQuestions}</strong>
+						<span>questions</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -167,13 +263,54 @@
 		color: var(--color-green);
 	}
 
-	.summary-panel {
+	.feature-stack {
 		align-self: center;
+		display: grid;
+		gap: var(--space-4);
+	}
+
+	.random-panel,
+	.summary-panel {
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
 		box-shadow: var(--shadow-card);
 		padding: var(--space-6);
+	}
+
+	.random-panel h2 {
+		margin: 0 0 var(--space-3);
+		font-size: var(--font-size-xl);
+		line-height: 1.2;
+		letter-spacing: 0;
+	}
+
+	.random-panel p:not(.panel-label) {
+		margin-bottom: var(--space-4);
+		color: var(--color-text-muted);
+		line-height: 1.5;
+	}
+
+	.quiz-meta,
+	.random-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.quiz-meta {
+		margin-bottom: var(--space-5);
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+	}
+
+	.quiz-meta span {
+		border: var(--border-width) solid var(--color-green-border);
+		border-radius: var(--radius-pill);
+		background: var(--color-green-soft);
+		padding: 0.25rem 0.55rem;
+		color: var(--color-green);
 	}
 
 	.summary-grid {
