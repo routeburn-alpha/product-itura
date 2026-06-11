@@ -1,5 +1,16 @@
 # Agent Notes
 
+- use git and gh outside the sandbox
+- keep green:
+  ```
+  # from app/
+  npm run check
+  npm run build
+  npm test
+  ```
+- always manually smoke test the app before pushing
+- follow docs/design-system.md
+
 ## Dev Server Hygiene
 
 Keep at most one local dev server running for this worktree.
