@@ -2024,10 +2024,10 @@
 		font-weight: var(--font-weight-semibold);
 		cursor: pointer;
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			color var(--motion-fast) var(--motion-ease),
-			transform var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.text-button {
@@ -2083,8 +2083,8 @@
 		color: var(--color-text);
 		outline: none;
 		transition:
-			border-color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease);
+			border-color var(--motion-duration-focus) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	textarea {
@@ -2198,7 +2198,6 @@
 
 	.primary-button:hover {
 		background: var(--color-green-hover);
-		transform: translateY(-1px);
 	}
 
 	.secondary-button {
@@ -2282,8 +2281,8 @@
 		outline: none;
 		overflow-wrap: anywhere;
 		transition:
-			border-color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease);
+			border-color var(--motion-duration-focus) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.editor-surface[data-empty='true']::before {
@@ -2619,7 +2618,7 @@
 		height: 100%;
 		border-radius: inherit;
 		background: var(--color-green);
-		transition: width var(--motion-medium) var(--motion-ease);
+		transition: width var(--motion-duration-progress) var(--motion-ease-standard);
 	}
 
 	.preview-question-card,
@@ -2665,9 +2664,10 @@
 		font-weight: var(--font-weight-semibold);
 		cursor: pointer;
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			color var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.preview-choice {
@@ -2881,9 +2881,26 @@
 		background: var(--color-surface);
 		padding: 0.85rem;
 		transition:
-			border-color var(--motion-fast) var(--motion-ease),
-			box-shadow var(--motion-fast) var(--motion-ease),
-			opacity var(--motion-fast) var(--motion-ease);
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard),
+			opacity var(--motion-duration-feedback) var(--motion-ease-standard);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.primary-button,
+		.secondary-button,
+		.danger-button {
+			transition:
+				background var(--motion-duration-hover) var(--motion-ease-standard),
+				border-color var(--motion-duration-hover) var(--motion-ease-standard),
+				color var(--motion-duration-hover) var(--motion-ease-standard),
+				box-shadow var(--motion-duration-focus) var(--motion-ease-standard),
+				transform var(--motion-duration-hover) var(--motion-ease-standard);
+		}
+
+		.primary-button:hover {
+			transform: translateY(-1px);
+		}
 	}
 
 	.managed-question-list li.dragging {

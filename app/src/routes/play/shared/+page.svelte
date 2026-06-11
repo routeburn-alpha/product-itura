@@ -185,6 +185,7 @@
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-semibold);
 		text-decoration: none;
+		transition: color var(--motion-duration-hover) var(--motion-ease-standard);
 	}
 
 	.back-link:hover {

@@ -140,13 +140,14 @@
 		padding: 1rem;
 		color: inherit;
 		text-decoration: none;
-		transition: border-color var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease), transform var(--motion-fast) var(--motion-ease);
+		transition:
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-hover) var(--motion-ease-standard);
 	}
 
 	.pack-card:hover {
 		border-color: var(--color-green);
 		box-shadow: var(--shadow-hover);
-		transform: translateY(-2px);
 	}
 
 	.category {
@@ -183,6 +184,19 @@
 
 	.pack-card:hover .play {
 		color: var(--color-green);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.pack-card {
+			transition:
+				border-color var(--motion-duration-hover) var(--motion-ease-standard),
+				box-shadow var(--motion-duration-hover) var(--motion-ease-standard),
+				transform var(--motion-duration-hover) var(--motion-ease-standard);
+		}
+
+		.pack-card:hover {
+			transform: translateY(-2px);
+		}
 	}
 
 	@media (max-width: 680px) {

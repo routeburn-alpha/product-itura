@@ -685,6 +685,7 @@
 		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-semibold);
 		text-decoration: none;
+		transition: color var(--motion-duration-hover) var(--motion-ease-standard);
 	}
 
 	.back-link:hover {
@@ -725,7 +726,7 @@
 		height: 100%;
 		border-radius: inherit;
 		background: var(--color-green);
-		transition: width var(--motion-medium) var(--motion-ease);
+		transition: width var(--motion-duration-progress) var(--motion-ease-standard);
 	}
 
 	.question-card,
@@ -741,7 +742,7 @@
 	.question-card {
 		display: grid;
 		gap: 1.25rem;
-		animation: enter-question var(--motion-medium) var(--motion-ease) both;
+		animation: enter-question var(--motion-duration-entry) var(--motion-ease-standard) both;
 	}
 
 	.pack-kicker {
@@ -805,10 +806,10 @@
 		font-weight: var(--font-weight-semibold);
 		cursor: pointer;
 		transition:
-			background var(--motion-fast) var(--motion-ease),
-			border-color var(--motion-fast) var(--motion-ease),
-			color var(--motion-fast) var(--motion-ease),
-			transform var(--motion-fast) var(--motion-ease);
+			background var(--motion-duration-hover) var(--motion-ease-standard),
+			border-color var(--motion-duration-hover) var(--motion-ease-standard),
+			color var(--motion-duration-hover) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.choice,
@@ -908,6 +909,9 @@
 		padding: 0.85rem;
 		font: inherit;
 		outline: none;
+		transition:
+			border-color var(--motion-duration-focus) var(--motion-ease-standard),
+			box-shadow var(--motion-duration-focus) var(--motion-ease-standard);
 	}
 
 	.blank-answer input:focus {
@@ -963,7 +967,6 @@
 
 	.primary-button:hover:not(:disabled) {
 		background: var(--color-green-hover);
-		transform: translateY(-1px);
 	}
 
 	.primary-button:disabled {
@@ -980,6 +983,22 @@
 	.secondary-button:hover {
 		border-color: var(--color-green);
 		color: var(--color-green);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.primary-button,
+		.secondary-button {
+			transition:
+				background var(--motion-duration-hover) var(--motion-ease-standard),
+				border-color var(--motion-duration-hover) var(--motion-ease-standard),
+				color var(--motion-duration-hover) var(--motion-ease-standard),
+				box-shadow var(--motion-duration-focus) var(--motion-ease-standard),
+				transform var(--motion-duration-hover) var(--motion-ease-standard);
+		}
+
+		.primary-button:hover:not(:disabled) {
+			transform: translateY(-1px);
+		}
 	}
 
 	.result-card,
