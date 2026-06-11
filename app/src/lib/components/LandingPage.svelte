@@ -67,16 +67,20 @@
 		return Math.floor(Math.random() * length);
 	}
 
-	function selectRandomPack() {
+	function selectRandomPack(avoidPackId?: string) {
 		if (packs.length === 0) {
 			randomPack = null;
 			return;
 		}
 
 		const recentPackIds = readRecentPackIds();
-		const freshPacks = packs.filter((pack) => !recentPackIds.includes(pack.id));
-		const candidates = freshPacks.length > 0 ? freshPacks : packs;
-		const selectedPack = candidates[getRandomIndex(candidates.length)] ?? null;
+		const freshPacks = packs.filter(
+			(pack) => pack.id !== avoidPackId && !recentPackIds.includes(pack.id)
+		);
+		const alternatePacks = packs.filter((pack) => pack.id !== avoidPackId);
+		const fallbackCandidates =
+			freshPacks.length > 0 ? freshPacks : alternatePacks.length > 0 ? alternatePacks : packs;
+		const selectedPack = fallbackCandidates[getRandomIndex(fallbackCandidates.length)] ?? null;
 
 		randomPack = selectedPack;
 
@@ -124,7 +128,13 @@
 					</div>
 					<div class="random-actions">
 						<a class="primary-action" href="{base}/play/{presentedPack.id}">Start random quiz</a>
-						<button type="button" class="secondary-action" onclick={selectRandomPack}>Shuffle</button>
+						<button
+							type="button"
+							class="secondary-action"
+							onclick={() => selectRandomPack(presentedPack.id)}
+						>
+							Shuffle
+						</button>
 					</div>
 				{:else}
 					<p>No published quizzes are available yet.</p>
