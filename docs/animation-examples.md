@@ -17,7 +17,7 @@ Story Format story with minimal rewriting.
 | Hover and focus | Shared global transitions plus route-local component hover states. | `Components/Interactive States` with hover, focus-visible, disabled, and selected states. |
 | Overlay entry and exit | Appearance popover in `+layout.svelte`. | `App Shell/Appearance Popover` with closed, opening, open, and reduced-motion examples. |
 | Form validation | Creator setup and question builder validation states. | `Creator/Form Validation` with idle, error, success, and reduced-motion states. |
-| Route loading | Shared layout route entry, progress status, and skeleton band. | `App Shell/Route Loading` with loading, settled, and reduced-motion states. |
+| Route fade-in | Keyed route content fades in without progress or skeleton loading UI. | `App Shell/Route Fade-In` with default and reduced-motion states. |
 
 ## Motion token story
 
@@ -180,52 +180,41 @@ input[data-validation-state='error'],
 }
 ```
 
-## Route loading story
+## Route fade-in story
 
 Use the shared layout pattern for route changes. The Storybook example should
-show a page shell, a top loading status, a neutral skeleton band, and a settled
-view.
+show a page shell where route content swaps with a simple opacity fade. Do not
+add progress bars or skeleton bands for ordinary navbar navigation.
 
 | State | Visual example | Accessibility check |
 | --- | --- | --- |
-| Loading | Slim green progress bar and three neutral skeleton lines. | Progress wrapper has `role="status"` and status copy. |
-| Content swap | New route content renders without a page-level transition. | Content remains readable and does not shift surrounding layout. |
-| Settled | Progress and skeleton are removed. | Route shell has `aria-busy="false"`. |
-| Reduced motion | Progress and skeleton do not shimmer. | Status copy remains available. |
+| Entering | New route content fades in. | Content remains readable and does not shift surrounding layout. |
+| Settled | New route content is fully opaque. | Focus order follows the rendered page. |
+| Reduced motion | Route content appears without animation. | Same content and keyboard behavior. |
 
 Example markup:
 
 ```svelte
-{#if routeLoading}
-	<div class="route-progress" role="status" aria-live="polite">
-		<span class="visually-hidden">Loading next page</span>
-		<span aria-hidden="true"></span>
-	</div>
-	<div class="route-skeleton" aria-hidden="true">
-		<span></span>
-		<span></span>
-		<span></span>
-	</div>
-{/if}
+<div class="route-shell">
+	{#key routeKey}
+		<div class="route-view">
+			{@render children()}
+		</div>
+	{/key}
+</div>
 ```
 
 Example CSS:
 
 ```css
-.route-progress span[aria-hidden='true'] {
-	background: var(--color-green);
-	animation: route-progress var(--motion-duration-loading) var(--motion-ease-emphasized) infinite;
+.route-view {
+	animation: route-view-in var(--motion-duration-entry) var(--motion-ease-standard) both;
 }
 
-.route-skeleton span {
-	background:
-		linear-gradient(
-			90deg,
-			var(--color-surface-subtle) 0%,
-			var(--color-surface-muted) 48%,
-			var(--color-surface-subtle) 100%
-		);
-	animation: route-skeleton-shimmer var(--motion-duration-loading) var(--motion-ease-emphasized) infinite;
+@media (prefers-reduced-motion: reduce) {
+	.route-view {
+		animation: none;
+	}
 }
 ```
 
@@ -252,7 +241,7 @@ motion removed or reduced to static state changes.
 
 | Surface | Default motion | Reduced-motion behavior |
 | --- | --- | --- |
-| Route loading | Progress animates and skeleton shimmers while route content swaps without a page transition. | Progress animation and shimmer are removed. |
+| Route fade-in | Route content fades in without progress or skeleton loading UI. | Route content appears without animation. |
 | Appearance popover | Opacity and scale transition. | Opacity transition only; scale transform is removed. |
 | Creator validation | Invalid surfaces, messages, and icons animate in. | Validation state appears immediately with the same copy and icons. |
 | Quiz player | Question card enters with opacity/translate and progress width transitions. | Question card appears statically and progress width snaps to the new value. |
