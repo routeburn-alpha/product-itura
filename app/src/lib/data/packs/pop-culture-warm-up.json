@@ -1,0 +1,93 @@
+{
+  "id": "pop-culture-warm-up",
+  "title": "Pop Culture Warm-Up",
+  "category": "Pop Culture",
+  "description": "A breezy mix of movies, music, TV, and entertainment staples.",
+  "questions": [
+    {
+      "id": "pcw-1",
+      "type": "multiple-choice",
+      "prompt": "Which movie features the line 'May the Force be with you'?",
+      "choices": ["Star Wars", "The Matrix", "Jurassic Park", "Toy Story"],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "It is a space saga with Jedi and lightsabers.",
+      "explanation": "'May the Force be with you' is one of the signature lines from the Star Wars franchise."
+    },
+    {
+      "id": "pcw-2",
+      "type": "multiple-choice",
+      "prompt": "Which singer released the album 'Thriller'?",
+      "choices": ["Prince", "Michael Jackson", "Stevie Wonder", "Lionel Richie"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "He was often called the King of Pop.",
+      "explanation": "Michael Jackson released 'Thriller' in 1982."
+    },
+    {
+      "id": "pcw-3",
+      "type": "true-false",
+      "prompt": "The TV series 'Friends' is set primarily in New York City.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "The characters often gather at Central Perk.",
+      "explanation": "'Friends' follows a group of friends living in New York City."
+    },
+    {
+      "id": "pcw-4",
+      "type": "multiple-choice",
+      "prompt": "What is the name of the cowboy toy in 'Toy Story'?",
+      "choices": ["Buzz", "Woody", "Andy", "Rex"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "His pull-string voice is a big part of the first movie.",
+      "explanation": "Woody is the cowboy doll and one of the central characters in 'Toy Story.'"
+    },
+    {
+      "id": "pcw-5",
+      "type": "fill-blank",
+      "prompt": "The wizarding school in the Harry Potter series is called _____.",
+      "blankAnswer": "Hogwarts",
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Its four houses include Gryffindor and Slytherin.",
+      "explanation": "Hogwarts School of Witchcraft and Wizardry is the main school in the Harry Potter series."
+    },
+    {
+      "id": "pcw-6",
+      "type": "multiple-choice",
+      "prompt": "Which superhero is also known as the Dark Knight?",
+      "choices": ["Superman", "Batman", "Spider-Man", "Iron Man"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "He protects Gotham City.",
+      "explanation": "Batman is often called the Dark Knight."
+    },
+    {
+      "id": "pcw-7",
+      "type": "multiple-choice",
+      "prompt": "Which animated film features the song 'Let It Go'?",
+      "choices": ["Frozen", "Moana", "Encanto", "Tangled"],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "The song is performed by Queen Elsa.",
+      "explanation": "'Let It Go' is from Disney's 'Frozen.'"
+    },
+    {
+      "id": "pcw-8",
+      "type": "true-false",
+      "prompt": "The Beatles were originally from Liverpool, England.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Their hometown is strongly associated with Merseybeat.",
+      "explanation": "The Beatles formed in Liverpool, England."
+    }
+  ]
+}

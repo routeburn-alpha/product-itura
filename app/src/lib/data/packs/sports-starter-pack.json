@@ -1,0 +1,93 @@
+{
+  "id": "sports-starter-pack",
+  "title": "Sports Starter Pack",
+  "category": "Sports",
+  "description": "Classic sports trivia across trophies, rules, teams, and famous athletes.",
+  "questions": [
+    {
+      "id": "ssp-1",
+      "type": "multiple-choice",
+      "prompt": "How many players are on the court for one basketball team during normal play?",
+      "choices": ["Four", "Five", "Six", "Seven"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Think of the five traditional positions.",
+      "explanation": "A basketball team has five players on the court during standard play."
+    },
+    {
+      "id": "ssp-2",
+      "type": "multiple-choice",
+      "prompt": "Which tournament awards the FIFA World Cup trophy?",
+      "choices": ["Tennis", "Cricket", "Soccer", "Golf"],
+      "correctIndex": 2,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "FIFA governs the world's most popular ball sport.",
+      "explanation": "The FIFA World Cup is the top international soccer tournament."
+    },
+    {
+      "id": "ssp-3",
+      "type": "true-false",
+      "prompt": "A tennis match can be played as singles or doubles.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Doubles puts two players on each side.",
+      "explanation": "Tennis can be played one-on-one as singles or two-on-two as doubles."
+    },
+    {
+      "id": "ssp-4",
+      "type": "multiple-choice",
+      "prompt": "In baseball, how many strikes usually make an out?",
+      "choices": ["Two", "Three", "Four", "Five"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "The common phrase is 'three strikes.'",
+      "explanation": "A batter is usually out after three strikes."
+    },
+    {
+      "id": "ssp-5",
+      "type": "fill-blank",
+      "prompt": "The Olympic Games are symbolized by five interlocking _____.",
+      "blankAnswer": "rings",
+      "difficulty": 1,
+      "points": 1,
+      "hint": "They appear in blue, yellow, black, green, and red.",
+      "explanation": "The Olympic symbol is five interlocking rings."
+    },
+    {
+      "id": "ssp-6",
+      "type": "multiple-choice",
+      "prompt": "Which sport is associated with Wimbledon?",
+      "choices": ["Tennis", "Rugby", "Cycling", "Boxing"],
+      "correctIndex": 0,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "The event is famous for grass courts.",
+      "explanation": "Wimbledon is one of tennis's four Grand Slam tournaments."
+    },
+    {
+      "id": "ssp-7",
+      "type": "multiple-choice",
+      "prompt": "Which athlete is famous for winning eight gold medals in swimming at the 2008 Olympics?",
+      "choices": ["Usain Bolt", "Michael Phelps", "Simone Biles", "Tom Brady"],
+      "correctIndex": 1,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "He is the most decorated Olympian in history.",
+      "explanation": "Michael Phelps won eight swimming gold medals at the 2008 Beijing Olympics."
+    },
+    {
+      "id": "ssp-8",
+      "type": "true-false",
+      "prompt": "In golf, the goal is to complete each hole in as few strokes as possible.",
+      "trueFalseAnswer": true,
+      "difficulty": 1,
+      "points": 1,
+      "hint": "Lower scores are better in golf.",
+      "explanation": "Golf scoring rewards fewer strokes."
+    }
+  ]
+}

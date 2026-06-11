@@ -1,0 +1,115 @@
+{
+  "id": "world-geography-tour",
+  "title": "World Geography Tour",
+  "category": "Geography",
+  "description": "Travel through countries, rivers, cities, landmarks, and maps.",
+  "questions": [
+    {
+      "id": "wgt-1",
+      "type": "multiple-choice",
+      "prompt": "Which river flows through Cairo?",
+      "choices": ["Amazon", "Nile", "Danube", "Ganges"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is strongly associated with ancient Egypt.",
+      "explanation": "The Nile River flows through Cairo and has shaped Egyptian history for millennia."
+    },
+    {
+      "id": "wgt-2",
+      "type": "multiple-choice",
+      "prompt": "Which country is both a continent and a country?",
+      "choices": ["Greenland", "Australia", "Madagascar", "Iceland"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is surrounded by the Indian and Pacific Oceans.",
+      "explanation": "Australia is commonly described as both a country and a continent."
+    },
+    {
+      "id": "wgt-3",
+      "type": "fill-blank",
+      "prompt": "The imaginary line at 0 degrees latitude is the _____.",
+      "blankAnswer": "equator",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It divides Earth into Northern and Southern Hemispheres.",
+      "explanation": "The equator is the line of 0 degrees latitude."
+    },
+    {
+      "id": "wgt-4",
+      "type": "multiple-choice",
+      "prompt": "Which mountain range separates much of Europe from Asia?",
+      "choices": ["Andes", "Urals", "Rockies", "Atlas"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The range runs north-south through western Russia.",
+      "explanation": "The Ural Mountains are commonly used as part of the boundary between Europe and Asia."
+    },
+    {
+      "id": "wgt-5",
+      "type": "true-false",
+      "prompt": "Japan is an island nation.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Its major islands include Honshu, Hokkaido, Kyushu, and Shikoku.",
+      "explanation": "Japan is an archipelago made up of thousands of islands."
+    },
+    {
+      "id": "wgt-6",
+      "type": "multiple-choice",
+      "prompt": "Which desert is the largest hot desert in the world?",
+      "choices": ["Gobi", "Sahara", "Kalahari", "Mojave"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It stretches across much of North Africa.",
+      "explanation": "The Sahara is the world's largest hot desert."
+    },
+    {
+      "id": "wgt-7",
+      "type": "multiple-choice",
+      "prompt": "Which city is home to the Colosseum?",
+      "choices": ["Athens", "Rome", "Istanbul", "Madrid"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It was the heart of the ancient Roman Empire.",
+      "explanation": "The Colosseum is in Rome, Italy."
+    },
+    {
+      "id": "wgt-8",
+      "type": "multiple-choice",
+      "prompt": "Which country has the longest coastline in the world?",
+      "choices": ["Brazil", "Canada", "Australia", "Norway"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Its Arctic islands add a huge amount of shoreline.",
+      "explanation": "Canada has the world's longest coastline."
+    },
+    {
+      "id": "wgt-9",
+      "type": "true-false",
+      "prompt": "The Andes are located in South America.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "They run along the western edge of the continent.",
+      "explanation": "The Andes are a major mountain range along South America's western side."
+    },
+    {
+      "id": "wgt-10",
+      "type": "multiple-choice",
+      "prompt": "Which sea lies between Europe and Africa?",
+      "choices": ["Caribbean Sea", "Mediterranean Sea", "Baltic Sea", "Red Sea"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Ancient Greek, Roman, Egyptian, and Phoenician trade crossed it.",
+      "explanation": "The Mediterranean Sea lies between southern Europe and northern Africa."
+    }
+  ]
+}

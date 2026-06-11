@@ -6,44 +6,52 @@ existing pack loader can read without extra registration.
 
 ## Pack shape
 
-Each pack represents one learner-ready quiz:
+Each pack represents one player-ready trivia quiz:
 
 ```json
 {
-  "id": "beginner-fundamentals",
-  "title": "Beginner Fundamentals",
-  "category": "Beginner / Fundamentals",
-  "description": "A short learner-facing summary of the quiz outcome.",
+  "id": "general-knowledge-grab-bag",
+  "title": "General Knowledge Grab Bag",
+  "category": "Mixed Trivia",
+  "description": "A short player-facing summary of the quiz topic.",
   "questions": []
 }
 ```
 
 - `id` is lower-kebab-case and must match the file name.
 - `title` should be clear in the pack picker and avoid internal labels.
-- `category` uses `Difficulty / Theme` for idea #4 content.
-- `description` names the learning outcome, not the implementation details.
+- Do not include difficulty labels such as Beginner, Intermediate, or Advanced
+  in `title`, `id`, or `category`.
+- `category` is player-facing trivia taxonomy, such as `Science`, `Sports`,
+  `History`, `Geography`, `Culture`, `Pop Culture`, or `Mixed Trivia`.
+- `description` names the trivia subject matter, not the implementation details.
 - `questions` should contain 8-12 beginner questions, 10-15 intermediate
   questions, or 12-18 advanced questions.
 
 ## Difficulty tiers
 
-| Tier | Difficulty value | Question count | Learner expectation |
+| Tier | Difficulty value | Question count | Trivia expectation |
 | --- | --- | --- | --- |
-| Beginner | `1` | 8-12 | Recall core concepts, identify simple patterns, and apply one rule at a time. |
-| Intermediate | `2` | 10-15 | Work through short scenarios, compare tradeoffs, and combine two or more concepts. |
-| Advanced | `3` | 12-18 | Analyze ambiguous cases, synthesize multiple concepts, and justify prioritization. |
+| Beginner | `1` | 8-12 | Familiar general trivia with short prompts and direct clues. |
+| Intermediate | `2` | 10-15 | Broader world knowledge, multi-topic recall, and slightly more specific facts. |
+| Advanced | `3` | 12-18 | Deep cuts, firsts, records, cross-category clues, and more precise recall. |
 
-## Themes
+Difficulty is stored on each question through `difficulty`. It is not part of
+the visible quiz name.
 
-- **Fundamentals:** vocabulary, definitions, core concepts, and basic cause and
-  effect.
-- **Application:** practical scenarios, workflow choices, and real-world use.
-- **Analysis:** interpretation, diagnosis, prioritization, and critical
-  reasoning.
+## Trivia topics
 
-Every difficulty tier should include coverage across these themes. A pack can be
-theme-specific, such as `Beginner / Fundamentals`, or mixed-theme when the task
-calls for progressive coverage.
+Idea #4 trivia packs should cover a wide range of subjects:
+
+- **Mixed trivia:** general knowledge and championship-style cross-category
+  rounds.
+- **Pop culture:** movies, music, TV, books, awards, and franchises.
+- **Sports:** rules, trophies, athletes, tournaments, and records.
+- **Geography:** countries, cities, rivers, landmarks, borders, and maps.
+- **History:** civilizations, leaders, inventions, conflicts, and turning
+  points.
+- **Science:** space, biology, chemistry, weather, physics, and the human body.
+- **Culture:** food, travel, languages, festivals, customs, and landmarks.
 
 ## Question formats
 
@@ -55,22 +63,22 @@ Use for recognition, comparison, and scenario selection.
 {
   "id": "bf-1",
   "type": "multiple-choice",
-  "prompt": "Which option best describes a quiz learning objective?",
+  "prompt": "Which planet is known as the Red Planet?",
   "choices": [
-    "A measurable outcome for the learner",
-    "The total number of packs in the app",
-    "The color used for the primary button",
-    "A random answer order"
+    "Venus",
+    "Mars",
+    "Jupiter",
+    "Mercury"
   ],
-  "correctIndex": 0,
+  "correctIndex": 1,
   "difficulty": 1,
   "points": 1,
-  "explanation": "A learning objective states what the learner should be able to do after the question or quiz."
+  "hint": "Its rusty color comes from iron oxide on the surface.",
+  "explanation": "Mars is called the Red Planet because iron-rich dust gives it a reddish appearance."
 }
 ```
 
-Learning objective: learners identify the best answer from plausible
-alternatives and can explain why the distractors are weaker.
+Use plausible distractors from the same trivia domain.
 
 ### True / false
 
@@ -80,16 +88,16 @@ Use for crisp misconceptions, rule checks, and quick confidence checks.
 {
   "id": "bf-2",
   "type": "true-false",
-  "prompt": "A quiz explanation should teach the concept, not only repeat the answer.",
+  "prompt": "The Pacific Ocean is the largest ocean on Earth.",
   "trueFalseAnswer": true,
   "difficulty": 1,
   "points": 1,
-  "explanation": "Explanations should reinforce the concept so the learner can transfer it to a new question."
+  "hint": "It covers more area than all land on Earth combined.",
+  "explanation": "The Pacific Ocean is Earth's largest and deepest ocean."
 }
 ```
 
-Learning objective: learners confirm or reject a statement and understand the
-rule behind it.
+Use true/false for crisp trivia statements, not trick wording.
 
 ### Short answer
 
@@ -100,32 +108,36 @@ specific, and case-insensitive after trimming.
 {
   "id": "bf-3",
   "type": "fill-blank",
-  "prompt": "A concise statement of what a learner should be able to do is a learning _____.",
-  "blankAnswer": "objective",
+  "prompt": "The tallest mountain above sea level is Mount _____.",
+  "blankAnswer": "Everest",
   "difficulty": 1,
   "points": 1,
-  "explanation": "The accepted answer is objective. Short-answer prompts should avoid synonyms unless the app later supports multiple accepted answers."
+  "hint": "It sits in the Himalayas.",
+  "explanation": "Mount Everest is the tallest mountain above sea level."
 }
 ```
 
-Learning objective: learners recall a term or concept without answer choices.
+Short-answer prompts should have one obvious accepted answer because the player
+does not currently support multiple accepted spellings or synonyms.
 
 ## Scoring
 
-- Default to `1` point for beginner recall and true/false questions.
-- Use `2` points for intermediate scenario or multi-step questions.
-- Use `3` points for advanced synthesis, prioritization, or diagnosis.
+- Use `1` point for beginner trivia.
+- Use `2` points for intermediate trivia.
+- Use `3` points for advanced trivia.
 - Keep total quiz points meaningful but simple; the player normalizes missing
   points to `1`.
 
 ## Content quality checklist
 
-- Each question has an `explanation` that teaches the concept.
+- Each question is trivia-style and asks for a fact, identification, record,
+  first, place, person, work, rule, or cultural reference.
+- Each question has a `hint` that nudges without giving away the answer.
+- Each question has an `explanation` that gives the answer and a little context.
 - Choices are parallel in length and tone where possible.
 - Distractors are plausible but not trick answers.
-- Advanced questions ask for the best answer, priority, or diagnosis when more
-  than one detail might be partly true.
+- Advanced explanations include a short "For further study" pointer.
 - No question depends on hidden app state, dates, or facts likely to become
   stale unless the explanation names the relevant context.
-- Question IDs use a stable pack prefix, such as `bf-1` for Beginner
-  Fundamentals.
+- Question IDs use a stable pack prefix, such as `gk-1` for General Knowledge
+  Grab Bag.

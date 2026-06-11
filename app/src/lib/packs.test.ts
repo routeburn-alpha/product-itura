@@ -2,16 +2,35 @@ import { describe, expect, it } from 'vitest';
 import { getPack, listPacks } from './packs';
 
 const ideaPackIds = new Set([
-	'beginner-analysis',
-	'beginner-application',
-	'beginner-fundamentals',
-	'intermediate-concept-connections',
-	'intermediate-evidence-review',
-	'intermediate-practical-decisions',
-	'intermediate-progressive-challenge',
-	'advanced-concept-synthesis',
-	'advanced-strategy-application',
-	'advanced-systems-analysis'
+	'general-knowledge-grab-bag',
+	'pop-culture-warm-up',
+	'sports-starter-pack',
+	'world-geography-tour',
+	'historys-greatest-hits',
+	'science-all-around-us',
+	'food-travel-and-culture',
+	'deep-cut-pop-culture',
+	'records-firsts-and-oddities',
+	'championship-trivia'
+]);
+
+const beginnerPackIds = new Set([
+	'general-knowledge-grab-bag',
+	'pop-culture-warm-up',
+	'sports-starter-pack'
+]);
+
+const intermediatePackIds = new Set([
+	'world-geography-tour',
+	'historys-greatest-hits',
+	'science-all-around-us',
+	'food-travel-and-culture'
+]);
+
+const advancedPackIds = new Set([
+	'deep-cut-pop-culture',
+	'records-firsts-and-oddities',
+	'championship-trivia'
 ]);
 
 function getQuestionType(question: Record<string, unknown>) {
@@ -31,18 +50,18 @@ describe('pack data loading', () => {
 		const packs = listPacks();
 
 		expect(packs.map((pack) => pack.id)).toEqual([
-			'advanced-concept-synthesis',
-			'advanced-strategy-application',
-			'advanced-systems-analysis',
-			'beginner-analysis',
-			'beginner-application',
-			'beginner-fundamentals',
+			'championship-trivia',
+			'deep-cut-pop-culture',
 			'nyt-easy',
-			'intermediate-concept-connections',
-			'intermediate-evidence-review',
-			'intermediate-practical-decisions',
-			'intermediate-progressive-challenge',
-			'premier-league'
+			'food-travel-and-culture',
+			'general-knowledge-grab-bag',
+			'historys-greatest-hits',
+			'pop-culture-warm-up',
+			'premier-league',
+			'records-firsts-and-oddities',
+			'science-all-around-us',
+			'sports-starter-pack',
+			'world-geography-tour'
 		]);
 		expect(packs.every((pack) => pack.questions.length > 0)).toBe(true);
 	});
@@ -118,19 +137,25 @@ describe('published quiz packs', () => {
 		}
 	});
 
-	it('matches the idea 4 difficulty and theme requirements', () => {
+	it('matches the idea 4 trivia difficulty and naming requirements', () => {
 		const ideaPacks = packs.filter((pack) => ideaPackIds.has(pack.id));
 
-		expect(ideaPacks.filter((pack) => pack.category.startsWith('Beginner /'))).toHaveLength(3);
-		expect(ideaPacks.filter((pack) => pack.category.startsWith('Intermediate /'))).toHaveLength(4);
-		expect(ideaPacks.filter((pack) => pack.category.startsWith('Advanced /'))).toHaveLength(3);
+		expect(ideaPacks.filter((pack) => beginnerPackIds.has(pack.id))).toHaveLength(3);
+		expect(ideaPacks.filter((pack) => intermediatePackIds.has(pack.id))).toHaveLength(4);
+		expect(ideaPacks.filter((pack) => advancedPackIds.has(pack.id))).toHaveLength(3);
 
 		for (const pack of ideaPacks) {
-			const tier = pack.category.split(' / ')[0];
+			const tier = beginnerPackIds.has(pack.id)
+				? 'Beginner'
+				: intermediatePackIds.has(pack.id)
+					? 'Intermediate'
+					: 'Advanced';
 			const expectedDifficulty = tier === 'Beginner' ? 1 : tier === 'Intermediate' ? 2 : 3;
 			const [minQuestions, maxQuestions] =
 				tier === 'Beginner' ? [8, 12] : tier === 'Intermediate' ? [10, 15] : [12, 18];
 
+			expect(pack.title, `${pack.id} title`).not.toMatch(/Beginner|Intermediate|Advanced/);
+			expect(pack.category, `${pack.id} category`).not.toMatch(/Beginner|Intermediate|Advanced/);
 			expect(pack.questions.length, pack.id).toBeGreaterThanOrEqual(minQuestions);
 			expect(pack.questions.length, pack.id).toBeLessThanOrEqual(maxQuestions);
 

@@ -1,0 +1,115 @@
+{
+  "id": "food-travel-and-culture",
+  "title": "Food, Travel, and Culture",
+  "category": "Culture",
+  "description": "Taste your way through dishes, languages, landmarks, festivals, and traditions.",
+  "questions": [
+    {
+      "id": "ftc-1",
+      "type": "multiple-choice",
+      "prompt": "Sushi is most closely associated with which country?",
+      "choices": ["Japan", "Mexico", "Morocco", "Greece"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Tokyo is one of its major food capitals.",
+      "explanation": "Sushi is strongly associated with Japanese cuisine."
+    },
+    {
+      "id": "ftc-2",
+      "type": "multiple-choice",
+      "prompt": "Which language is primarily spoken in Brazil?",
+      "choices": ["Spanish", "Portuguese", "French", "Italian"],
+      "correctIndex": 1,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Brazil was colonized by Portugal.",
+      "explanation": "Portuguese is the primary language of Brazil."
+    },
+    {
+      "id": "ftc-3",
+      "type": "true-false",
+      "prompt": "The Taj Mahal is located in India.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is in Agra.",
+      "explanation": "The Taj Mahal is a famous mausoleum in Agra, India."
+    },
+    {
+      "id": "ftc-4",
+      "type": "fill-blank",
+      "prompt": "The Italian city famous for canals and gondolas is _____.",
+      "blankAnswer": "Venice",
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Its name starts with V.",
+      "explanation": "Venice is famous for its canals and gondolas."
+    },
+    {
+      "id": "ftc-5",
+      "type": "multiple-choice",
+      "prompt": "Which festival is often called the Festival of Lights?",
+      "choices": ["Diwali", "Oktoberfest", "Carnival", "Hanami"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is widely celebrated by Hindus, Sikhs, Jains, and others.",
+      "explanation": "Diwali is commonly known as the Festival of Lights."
+    },
+    {
+      "id": "ftc-6",
+      "type": "multiple-choice",
+      "prompt": "Paella originated in which country?",
+      "choices": ["Spain", "Thailand", "Peru", "Turkey"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The rice dish is especially associated with Valencia.",
+      "explanation": "Paella originated in Spain, particularly the Valencia region."
+    },
+    {
+      "id": "ftc-7",
+      "type": "multiple-choice",
+      "prompt": "Which city is home to the Eiffel Tower?",
+      "choices": ["Paris", "Berlin", "Prague", "Vienna"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is the capital of France.",
+      "explanation": "The Eiffel Tower is in Paris, France."
+    },
+    {
+      "id": "ftc-8",
+      "type": "true-false",
+      "prompt": "Spanish and Portuguese are both Romance languages.",
+      "trueFalseAnswer": true,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "Romance languages developed from Latin.",
+      "explanation": "Spanish and Portuguese are Romance languages descended from Latin."
+    },
+    {
+      "id": "ftc-9",
+      "type": "multiple-choice",
+      "prompt": "Which country is known for the traditional garment called the kimono?",
+      "choices": ["Japan", "Norway", "Egypt", "Argentina"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "The word itself is Japanese.",
+      "explanation": "The kimono is a traditional Japanese garment."
+    },
+    {
+      "id": "ftc-10",
+      "type": "multiple-choice",
+      "prompt": "Which drink is traditionally central to a Japanese tea ceremony?",
+      "choices": ["Matcha", "Espresso", "Mate", "Lassi"],
+      "correctIndex": 0,
+      "difficulty": 2,
+      "points": 2,
+      "hint": "It is a powdered green tea.",
+      "explanation": "Matcha is the powdered green tea used in the Japanese tea ceremony."
+    }
+  ]
+}

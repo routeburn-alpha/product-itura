@@ -1,0 +1,136 @@
+{
+  "id": "records-firsts-and-oddities",
+  "title": "Records, Firsts, and Oddities",
+  "category": "Records & Oddities",
+  "description": "A tougher trivia set about milestones, unusual facts, and notable firsts.",
+  "questions": [
+    {
+      "id": "rfo-1",
+      "type": "multiple-choice",
+      "prompt": "Who was the first person to walk on the Moon?",
+      "choices": ["Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin", "John Glenn"],
+      "correctIndex": 1,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "He spoke about one small step.",
+      "explanation": "Neil Armstrong became the first person to walk on the Moon in 1969. For further study, review the Apollo 11 mission."
+    },
+    {
+      "id": "rfo-2",
+      "type": "multiple-choice",
+      "prompt": "Which country gifted the Statue of Liberty to the United States?",
+      "choices": ["France", "Italy", "Spain", "Germany"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The gift commemorated friendship across the Atlantic.",
+      "explanation": "France gave the Statue of Liberty to the United States. For further study, explore the statue's design and dedication history."
+    },
+    {
+      "id": "rfo-3",
+      "type": "true-false",
+      "prompt": "The first modern Olympic Games were held in Athens.",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "The location connected the modern games to ancient Greece.",
+      "explanation": "The first modern Olympic Games were held in Athens in 1896. For further study, review the revival of the Olympics."
+    },
+    {
+      "id": "rfo-4",
+      "type": "fill-blank",
+      "prompt": "The first artificial satellite launched into orbit was _____.",
+      "blankAnswer": "Sputnik",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It was launched by the Soviet Union in 1957.",
+      "explanation": "Sputnik 1 was the first artificial satellite. For further study, review the beginning of the Space Age."
+    },
+    {
+      "id": "rfo-5",
+      "type": "multiple-choice",
+      "prompt": "Which animal is known for having fingerprints that can resemble human fingerprints?",
+      "choices": ["Koala", "Penguin", "Camel", "Frog"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is a tree-dwelling marsupial from Australia.",
+      "explanation": "Koalas have fingerprints that can look surprisingly similar to human fingerprints. For further study, compare convergent traits in animals."
+    },
+    {
+      "id": "rfo-6",
+      "type": "multiple-choice",
+      "prompt": "Which element has the atomic number 1?",
+      "choices": ["Oxygen", "Hydrogen", "Carbon", "Helium"],
+      "correctIndex": 1,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It is the lightest element.",
+      "explanation": "Hydrogen has atomic number 1. For further study, review the structure of the periodic table."
+    },
+    {
+      "id": "rfo-7",
+      "type": "multiple-choice",
+      "prompt": "Which city hosted the first widely recognized modern World's Fair in 1851?",
+      "choices": ["London", "Paris", "Chicago", "Vienna"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It was held in the Crystal Palace.",
+      "explanation": "London hosted the Great Exhibition of 1851. For further study, review World's Fairs and industrial-era display culture."
+    },
+    {
+      "id": "rfo-8",
+      "type": "true-false",
+      "prompt": "Venus rotates in the opposite direction from most planets in the solar system.",
+      "trueFalseAnswer": true,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "Its rotation is called retrograde.",
+      "explanation": "Venus has retrograde rotation compared with most planets. For further study, review planetary rotation and axial tilt."
+    },
+    {
+      "id": "rfo-9",
+      "type": "multiple-choice",
+      "prompt": "Which book is often cited as the best-selling novel of all time?",
+      "choices": ["Don Quixote", "Moby-Dick", "The Great Gatsby", "Dracula"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It was written by Miguel de Cervantes.",
+      "explanation": "'Don Quixote' is often cited as the best-selling novel of all time. For further study, review early modern European literature."
+    },
+    {
+      "id": "rfo-10",
+      "type": "multiple-choice",
+      "prompt": "Which metal is liquid at room temperature?",
+      "choices": ["Mercury", "Copper", "Aluminum", "Iron"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It shares its name with a planet.",
+      "explanation": "Mercury is a metal that is liquid at room temperature. For further study, review states of matter and metallic elements."
+    },
+    {
+      "id": "rfo-11",
+      "type": "fill-blank",
+      "prompt": "The world's largest coral reef system is the Great Barrier _____.",
+      "blankAnswer": "Reef",
+      "difficulty": 3,
+      "points": 3,
+      "hint": "It lies off Australia's northeast coast.",
+      "explanation": "The Great Barrier Reef is the world's largest coral reef system. For further study, review reef ecosystems and marine biodiversity."
+    },
+    {
+      "id": "rfo-12",
+      "type": "multiple-choice",
+      "prompt": "Who was the first woman to fly solo across the Atlantic Ocean?",
+      "choices": ["Amelia Earhart", "Bessie Coleman", "Valentina Tereshkova", "Sally Ride"],
+      "correctIndex": 0,
+      "difficulty": 3,
+      "points": 3,
+      "hint": "She flew the route in 1932.",
+      "explanation": "Amelia Earhart was the first woman to fly solo across the Atlantic Ocean. For further study, review early aviation milestones."
+    }
+  ]
+}
