@@ -25,7 +25,7 @@ follow-up work without changing runtime behavior.
 | --- | --- | --- |
 | Global tokens | `--motion-fast: 150ms`, `--motion-medium: 250ms`, `--motion-slow: 400ms`, easing aliases, and semantic duration tokens exist in `:root` and every theme token map. | Route-local CSS still needs to migrate from compatibility aliases to semantic hover, focus, progress, entry, exit, feedback, and loading tokens. |
 | Focus | A global `:focus-visible` selector applies `--shadow-focus` to anchors, buttons, summary, form controls, and textbox roles. | Focus ring appearance is centralized, but focus transitions are not. Some local controls transition border and color; others snap directly. |
-| Reduced motion | No runtime `prefers-reduced-motion` rule is present in current app CSS. | Existing transform and keyframe motion is not reduced for users who request reduced motion. |
+| Reduced motion | Runtime `prefers-reduced-motion` fallbacks now collapse semantic durations, remove route/loading keyframes, stop validation and player entry animations, and keep the landing hero word static. | Continue to add local fallbacks for any future transform or keyframe motion. |
 | State animation policy | Transitions are local and mostly use the global tokens. | The app has no written rule for which properties may animate, which states should snap, and which states require motion opt-outs. |
 
 ## Existing Motion Inventory
@@ -84,9 +84,9 @@ follow-up work without changing runtime behavior.
    buttons, forms, progress, and reduced-motion behavior. This repo does not
    currently include Storybook, so documentation may need to live in project docs
    unless Storybook is introduced separately.
-7. **Task #41 - reduced motion:** add a global `@media (prefers-reduced-motion:
-   reduce)` policy that removes transforms/keyframes and shortens width/color
-   transitions where appropriate.
+7. **Task #41 - reduced motion:** keep the global `@media
+   (prefers-reduced-motion: reduce)` policy current, and add local static
+   fallbacks for future transform or keyframe motion.
 
 ## Implementation Guardrails
 

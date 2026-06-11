@@ -248,6 +248,21 @@ Example CSS:
 - Stay within the black, green, and white palette documented in
   `docs/design-system.md`.
 
+## Reduced-motion story
+
+Use this story to test the app with `prefers-reduced-motion: reduce` enabled.
+The expected result is not a separate visual design; it is the same UI with
+motion removed or reduced to static state changes.
+
+| Surface | Default motion | Reduced-motion behavior |
+| --- | --- | --- |
+| Route loading | Route view fades/translates, progress animates, skeleton shimmers. | Route transform, progress animation, and shimmer are removed. |
+| Appearance popover | Opacity and scale transition. | Opacity transition only; scale transform is removed. |
+| Creator validation | Invalid surfaces, messages, and icons animate in. | Validation state appears immediately with the same copy and icons. |
+| Quiz player | Question card enters with opacity/translate and progress width transitions. | Question card appears statically and progress width snaps to the new value. |
+| Landing hero word | Rotating word stack translates vertically. | First word is static; alternate words are hidden. |
+| Creator preview scroll | Preview start scrolls smoothly to the preview panel. | Preview start uses automatic scrolling. |
+
 ## Storybook migration notes
 
 When Storybook is introduced, start with these docs pages:

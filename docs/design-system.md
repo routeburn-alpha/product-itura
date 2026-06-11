@@ -491,6 +491,9 @@ predictable.
 - Every interactive element must have a visible `:focus-visible` state.
 - Correctness, invalid state, warning, selection, and destructive intent must not
   rely on color alone.
+- Reduced-motion users get static or near-instant alternatives: semantic motion
+  durations collapse to `1ms`, transform/keyframe surfaces are removed locally,
+  and JavaScript-initiated scrolling uses `auto` instead of `smooth`.
 - Keep keyboard order aligned with visual order.
 - Use native controls where possible: anchors for navigation, buttons for
   actions, checkboxes/radios/selects for native form choices.

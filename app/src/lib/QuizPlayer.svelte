@@ -1192,6 +1192,16 @@
 		}
 	}
 
+	@media (prefers-reduced-motion: reduce) {
+		.progress-track span {
+			transition: none;
+		}
+
+		.question-card {
+			animation: none;
+		}
+	}
+
 	@media (max-width: 620px) {
 		.container {
 			padding: 0.85rem 1rem 2rem;
