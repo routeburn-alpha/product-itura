@@ -108,6 +108,7 @@
 					<span>tougher</span>
 					<span>quicker</span>
 					<span>livelier</span>
+					<span>deeper</span>
 				</span>
 				quizzes.
 			</h1>
@@ -370,36 +371,40 @@
 
 	@keyframes word-shift {
 		0%,
-		10% {
+		11.111% {
 			transform: translateY(0);
 		}
-		12.5%,
-		22.5% {
+		11.111%,
+		22.222% {
 			transform: translateY(-1.04em);
 		}
-		25%,
-		35% {
+		22.222%,
+		33.333% {
 			transform: translateY(-2.08em);
 		}
-		37.5%,
-		47.5% {
+		33.333%,
+		44.444% {
 			transform: translateY(-3.12em);
 		}
-		50%,
-		60% {
+		44.444%,
+		55.555% {
 			transform: translateY(-4.16em);
 		}
-		62.5%,
-		72.5% {
+		55.555%,
+		66.666% {
 			transform: translateY(-5.2em);
 		}
-		75%,
-		85% {
+		66.666%,
+		77.777% {
 			transform: translateY(-6.24em);
 		}
-		87.5%,
-		97.5% {
+		77.777%,
+		88.888% {
 			transform: translateY(-7.28em);
+		}
+		88.888%,
+		99.999% {
+			transform: translateY(-8.32em);
 		}
 		100% {
 			transform: translateY(0);
